@@ -1,0 +1,9 @@
+[tool.black]
+line-length = 100
+safe = true
+py36 = true
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
