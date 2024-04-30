@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 setuptools = "==69.5.1"
-wheel = "*"
+wheel = "==0.43.0"
 
 [dev-packages]
 flake8 = "==7.0.0"
