@@ -4,6 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+setuptools = "==69.5.1"
+wheel = "*"
 
 [dev-packages]
 flake8 = "==7.0.0"
