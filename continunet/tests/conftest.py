@@ -6,7 +6,7 @@ from astropy.io import fits
 
 @pytest.fixture
 def fits_file(tmp_path):
-    """Fixture for creating a tempPrary FITS file with random data."""
+    """Fixture for creating a temporary FITS file with random data."""
     data = np.random.rand(100, 100)
 
     header = fits.Header()
