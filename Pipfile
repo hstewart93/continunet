@@ -8,6 +8,7 @@ setuptools = "==69.5.1"
 wheel = "==0.43.0"
 numpy = "==1.26.4"
 astropy = "==6.0.1"
+torch = "*"
 
 [dev-packages]
 flake8 = "==7.0.0"
