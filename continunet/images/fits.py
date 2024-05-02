@@ -51,10 +51,11 @@ class FitsImage(ABC):
         """Return the beam size in arcseconds."""
         if "BMAJ" not in self.header:
             raise KeyError("Header does not contain beam size information.")
+
         if self.header["BMAJ"] / self.header["BMIN"] == 1:
             return self.header["BMAJ"] * 3600
-        else:
-            raise KeyError("Beam is not circular.")
+
+        raise KeyError("Beam is not circular.")
 
 
 class ImageSquare(FitsImage):
