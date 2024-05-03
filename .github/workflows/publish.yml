@@ -2,8 +2,9 @@ name: Publish
 
 # only run the workflow when a new tag is pushed with a version number
 on:
-  tags:
-    - v*
+  push:
+    tags:
+      - v*
 
 jobs:
   publish:
@@ -30,9 +31,9 @@ jobs:
 
     - name: Make GitHub release
       uses: softprops/action-gh-release@v1
-        with:
-          files: dist/*
-          name: ${{ steps.branch_info.outputs.TAG }}
-          tag_name: ${{ steps.branch_info.outputs.TAG }}
+      with:
+        files: dist/*
+        name: ${{ steps.branch_info.outputs.TAG }}
+        tag_name: ${{ steps.branch_info.outputs.TAG }}
 
 
