@@ -4,7 +4,7 @@ Source finding package for radio continuum data powered by U-Net segmentation al
 ## Installation
 The project is available on PyPI, to install latest stable release use:
 
-```pip install```
+```pip install continunet```
 
 To install version in development, use:
 
