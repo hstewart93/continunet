@@ -9,6 +9,8 @@ on:
 jobs:
   publish:
     name: Publish to PyPi
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - name: Branch name
