@@ -1,0 +1,39 @@
+name: Publish
+
+# only run the workflow when a new tag is pushed with a version number
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  publish:
+    name: Publish to PyPi
+    runs-on: ubuntu-latest
+    steps:
+    - name: Branch name
+      id: branch_info
+      run: |
+        echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install
+      run: |
+        pip install -e .[ci]
+
+    - name: Build and publish
+      run: |
+        python -m build
+        python -m twine upload dist/* --non-interactive --verbose --disable-progress-bar --username "__token__" --password "${{ secrets.PYPI_TOKEN }}"
+
+    - name: Make GitHub release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*
+        name: ${{ steps.branch_info.outputs.TAG }}
+        tag_name: ${{ steps.branch_info.outputs.TAG }}
+
+

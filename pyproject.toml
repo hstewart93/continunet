@@ -1,0 +1,34 @@
+[tool.black]
+line-length = 100
+safe = true
+py36 = true
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "continunet"
+version = "0.0.1"
+authors = [
+    { name="Hattie Stewart" }
+]
+requires-python = ">=3.8"
+dependencies = [
+    "astropy>=6.0",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8",
+    "pre-commit",
+    "pytest",
+    "ipython",
+]
+ci = [
+    "twine",
+    "build"
+]
