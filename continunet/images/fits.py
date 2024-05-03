@@ -54,7 +54,7 @@ class FitsImage(ABC):
         if "BMIN" not in self.header:
             raise KeyError("Header does not contain 'BMIN' (beam size information).")
 
-        circular = self.header["BMAJ"] / self.header["BMIN"] == 1
+        circular = np.isclose(self.header["BMAJ"] / self.header["BMIN"], 1.0)
         if circular:
             return self.header["BMAJ"] * 3600
 
