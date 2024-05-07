@@ -50,12 +50,15 @@ class FitsImage(ABC):
     def get_beam_size(self):
         """Return the beam size in arcseconds."""
         if "BMAJ" not in self.header:
-            raise KeyError("Header does not contain beam size information.")
+            raise KeyError("Header does not contain 'BMAJ' (beam size information).")
+        if "BMIN" not in self.header:
+            raise KeyError("Header does not contain 'BMIN' (beam size information).")
 
-        if self.header["BMAJ"] / self.header["BMIN"] == 1:
+        circular = np.isclose(self.header["BMAJ"] / self.header["BMIN"], 1.0)
+        if circular:
             return self.header["BMAJ"] * 3600
 
-        raise KeyError("Beam is not circular.")
+        raise KeyError(f"Beam is not circular (BMAJ / BMIN = {circular} =! 1).")
 
 
 class ImageSquare(FitsImage):

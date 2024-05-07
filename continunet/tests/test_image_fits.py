@@ -44,6 +44,10 @@ class TestImageSquare:
         with pytest.raises(KeyError):
             image.get_beam_size()
 
+        del image.header["BMIN"]
+        with pytest.raises(KeyError):
+            image.get_beam_size()
+
         image.header["BMAJ"] = 0.01
         image.header["BMIN"] = 0.02
         with pytest.raises(KeyError):
