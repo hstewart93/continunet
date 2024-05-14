@@ -109,8 +109,17 @@ class Unet:
         )
         return model
 
-    def decode_image(self,):
+    def decode_image(self):
         """Returns images decoded by a trained model."""
         model = self.compile_model()
+        if self.trained_model is None or self.image is None:
+            raise ValueError("Trained model and image are required to decode image.")
+        if self.image.shape[0] % 256 != 0 and self.image.shape[1] % 256 != 0:
+            raise ValueError("Input shape should be divisible by 256.")
+        if len(self.image.shape) != 4:
+            raise ValueError("Input image must be 4D.")
+        if self.image.shape[3] != 1:
+            raise ValueError("Input image must be grayscale.")
+
         model.load_weights(self.trained_model)
         return model.predict(self.image)
