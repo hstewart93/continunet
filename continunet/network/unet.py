@@ -1,9 +1,15 @@
 """UNet model for image segmentation in keras."""
 
-from keras.layers import Conv2D, Conv2DTranspose
-from keras.layers import Input, BatchNormalization, Activation, Dropout
-from keras.layers import Concatenate
-from keras.layers import MaxPooling2D
+from keras.layers import (
+    Activation,
+    BatchNormalization,
+    Concatenate,
+    Conv2D,
+    Conv2DTranspose,
+    Dropout,
+    Input,
+    MaxPooling2D,
+)
 from keras.models import Model
 from tensorflow.keras.optimizers import Adam
 
