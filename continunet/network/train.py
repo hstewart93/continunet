@@ -5,6 +5,7 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 
 from config import KAGGLE_DATASET, TRAIN_DATASET_PATH
 
+
 class ApiCaller:
     def __init__(self):
         self.api = KaggleApi()
@@ -25,3 +26,6 @@ class UnetTrainer:
         if not os.path.exists(KAGGLE_DATASET):
             self.data_api.download_dataset(TRAIN_DATASET_PATH, KAGGLE_DATASET)
         return self
+
+    def load_data(self):
+        pass
