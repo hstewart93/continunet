@@ -3,11 +3,25 @@
 import os
 from kaggle.api.kaggle_api_extended import KaggleApi
 
-api = KaggleApi()
+from config import KAGGLE_DATASET, TRAIN_DATASET_PATH
 
-DATASET_NAME = "harrietstewart/continunet"
-SAVE_PATH = "continunet/network/data"
+class ApiCaller:
+    def __init__(self):
+        self.api = KaggleApi()
 
-os.makedirs(SAVE_PATH, exist_ok=True)
+    def download_dataset(self, dataset_name: str, save_path: str):
+        """Download the dataset from Kaggle and save it to the specified path."""
+        os.makedirs(save_path, exist_ok=True)
+        self.api.dataset_download_files(dataset_name, path=save_path, unzip=True)
+        return self
 
-api.dataset_download_files(DATASET_NAME, path=SAVE_PATH, unzip=True)
+
+class UnetTrainer:
+    def __init__(self):
+        self.data_api = ApiCaller()
+
+    def get_data(self):
+        # check if data is already downloaded
+        if not os.path.exists(KAGGLE_DATASET):
+            self.data_api.download_dataset(TRAIN_DATASET_PATH, KAGGLE_DATASET)
+        return self
