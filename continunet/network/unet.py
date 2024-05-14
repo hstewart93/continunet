@@ -1,5 +1,7 @@
 """UNet model for image segmentation in keras."""
 
+import numpy as np
+
 from keras.layers import (
     Activation,
     BatchNormalization,
@@ -70,8 +72,8 @@ class Unet:
     def build_model(self):
         """Build the UNet model."""
         input_image = Input(self.input_shape, name="img")
-        # Encoder Path
 
+        # Encoder Path
         first_convolutional_tensor, first_feature_map = self.encoding_block(
             input_image, self.n_filters * 1
         )
@@ -119,13 +121,15 @@ class Unet:
         """Returns images decoded by a trained model."""
         model = self.compile_model()
         if self.trained_model is None or self.image is None:
-            raise ValueError("Trained model and image are required to decode image.")
-        if self.image.shape[0] % 256 != 0 and self.image.shape[1] % 256 != 0:
-            raise ValueError("Input shape should be divisible by 256.")
+            raise ValueError("Trained model and image arguments are required to decode image.")
+        if isinstance(self.image, np.ndarray) is False:
+            raise TypeError("Image must be a numpy array.")
         if len(self.image.shape) != 4:
-            raise ValueError("Input image must be 4D.")
+            raise ValueError("Image must be 4D numpy array for example (1, 256, 256, 1).")
         if self.image.shape[3] != 1:
             raise ValueError("Input image must be grayscale.")
+        if self.image.shape[0] % 256 != 0 and self.image.shape[1] % 256 != 0:
+            raise ValueError("Image shape should be divisible by 256.")
 
         model.load_weights(self.trained_model)
         return model.predict(self.image)

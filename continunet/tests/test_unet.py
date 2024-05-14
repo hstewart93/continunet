@@ -44,6 +44,14 @@ class TestUnet:
         assert decoded_image.min() >= 0
         assert decoded_image.max() <= 1
 
+    def test_decode_image_invalid_image_type(self, trained_model, input_shape):
+        """Test the decode_image method with invalid image type"""
+
+        test_model = self.model(input_shape, image="invalid", trained_model=trained_model)
+
+        with pytest.raises(TypeError):
+            test_model.decode_image()
+
     def test_decode_image_invalid_input_shape(
         self, invalid_image, trained_model, invalid_image_input_shape
     ):
