@@ -23,3 +23,9 @@ def fits_file(tmp_path):
 
     yield path
     path.unlink()
+
+
+@pytest.fixture
+def trained_model():
+    """Fixture for a trained model."""
+    return "continunet/network/trained_model.h5"
