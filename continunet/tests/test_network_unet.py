@@ -16,8 +16,8 @@ class TestUnet:
         test_model = self.model(input_shape).build_model()
 
         assert test_model is not None
-        assert test_model.input_shape == (None, 256, 256, 1)
-        assert test_model.output_shape == (None, 256, 256, 1)
+        assert test_model.input_shape == (None, input_shape[0], input_shape[1], input_shape[2])
+        assert test_model.output_shape == (None, input_shape[0], input_shape[1], input_shape[2])
         assert len(test_model.layers) == 49
 
     def test_load_weights(self, trained_model, input_shape):
@@ -27,8 +27,8 @@ class TestUnet:
         test_model.load_weights(trained_model)
 
         assert test_model is not None
-        assert test_model.input_shape == (None, 256, 256, 1)
-        assert test_model.output_shape == (None, 256, 256, 1)
+        assert test_model.input_shape == (None, input_shape[0], input_shape[1], input_shape[2])
+        assert test_model.output_shape == (None, input_shape[0], input_shape[1], input_shape[2])
         assert len(test_model.layers) == 49
         assert test_model.get_weights() is not None
 
@@ -39,7 +39,7 @@ class TestUnet:
 
         decoded_image = test_model.decode_image()
         assert decoded_image is not None
-        assert decoded_image.shape == (1, 256, 256, 1)
+        assert decoded_image.shape == (1, input_shape[0], input_shape[1], input_shape[2])
 
         assert decoded_image.min() >= 0
         assert decoded_image.max() <= 1
