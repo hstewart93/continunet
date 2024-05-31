@@ -87,12 +87,13 @@ class Unet:
             convolutional_tensors.append((convolutional_tensor))
 
         # Latent Convolutional Block
-        latent_convolutional_tensor = self.convolutional_block(current, filters=self.filters * 16)
+        latent_convolutional_tensor = self.convolutional_block(
+            current, filters=self.filters * 2 ** self.layers
+        )
 
         # Decoder Path
         current = latent_convolutional_tensor
         for layer in reversed(range(self.layers)):
-            # import ipdb; ipdb.set_trace(context=25)
             current = self.decoding_block(
                 current, convolutional_tensors[layer], self.filters * (2 ** layer)
             )
