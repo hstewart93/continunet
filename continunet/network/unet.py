@@ -27,6 +27,8 @@ class Unet:
         batch_normalisation=True,
         trained_model=None,
         image=None,
+        layers=4,
+        output_activation="sigmoid",
     ):
         self.input_shape = input_shape
         self.filters = filters
@@ -34,6 +36,8 @@ class Unet:
         self.batch_normalisation = batch_normalisation
         self.trained_model = trained_model
         self.image = image
+        self.layers = layers
+        self.output_activation = output_activation
 
     def convolutional_block(self, input_tensor, filters, kernel_size=3):
         """Convolutional block for UNet."""
@@ -72,45 +76,33 @@ class Unet:
     def build_model(self):
         """Build the UNet model."""
         input_image = Input(self.input_shape, name="img")
+        current = input_image
 
         # Encoder Path
-        first_convolutional_tensor, first_feature_map = self.encoding_block(
-            input_image, self.filters * 1
-        )
-        second_convolutional_tensor, second_feature_map = self.encoding_block(
-            first_feature_map, self.filters * 2
-        )
-        third_convolutional_tensor, third_feature_map = self.encoding_block(
-            second_feature_map, self.filters * 4
-        )
-        fourth_convolutional_tensor, fourth_feature_map = self.encoding_block(
-            third_feature_map, self.filters * 8
-        )
-        latent_convolutional_tensor = self.convolutional_block(
-            fourth_feature_map, filters=self.filters * 16
-        )
+        convolutional_tensors = []
+        for layer in range(self.layers):
+            convolutional_tensor, current = self.encoding_block(
+                current, self.filters * (2 ** layer)
+            )
+            convolutional_tensors.append((convolutional_tensor))
+
+        # Latent Convolutional Block
+        latent_convolutional_tensor = self.convolutional_block(current, filters=self.filters * 16)
 
         # Decoder Path
-        sixth_convolutional_tensor = self.decoding_block(
-            latent_convolutional_tensor, fourth_convolutional_tensor, self.filters * 8
-        )
-        seventh_convolutional_tensor = self.decoding_block(
-            sixth_convolutional_tensor, third_convolutional_tensor, self.filters * 4
-        )
-        eighth_convolutional_tensor = self.decoding_block(
-            seventh_convolutional_tensor, second_convolutional_tensor, self.filters * 2
-        )
-        ninth_convolutional_tensor = self.decoding_block(
-            eighth_convolutional_tensor, first_convolutional_tensor, self.filters * 1
-        )
+        current = latent_convolutional_tensor
+        for layer in reversed(range(self.layers)):
+            # import ipdb; ipdb.set_trace(context=25)
+            current = self.decoding_block(
+                current, convolutional_tensors[layer], self.filters * (2 ** layer)
+            )
 
-        outputs = Conv2D(1, (1, 1), activation="sigmoid")(ninth_convolutional_tensor)
+        outputs = Conv2D(1, (1, 1), activation=self.output_activation)(current)
         model = Model(inputs=[input_image], outputs=[outputs])
         return model
 
     def compile_model(self):
         """Compile the UNet model."""
-        Input(self.input_shape, name="img")
         model = self.build_model()
         model.compile(
             optimizer=Adam(), loss="binary_crossentropy", metrics=["accuracy", "iou_score"]
