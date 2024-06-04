@@ -2,7 +2,7 @@
 
 import pytest
 
-from continunet.images.fits import ImageSquare
+from continunet.image.fits import ImageSquare
 
 
 class TestImageSquare:
