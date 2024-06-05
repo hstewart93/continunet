@@ -14,18 +14,8 @@ class TestUnet:
         """Test the compile_model method"""
         test_model = self.model(input_shape)
 
-        assert test_model.model.input_shape == (
-            None,
-            input_shape[0],
-            input_shape[1],
-            input_shape[2],
-        )
-        assert test_model.model.output_shape == (
-            None,
-            input_shape[0],
-            input_shape[1],
-            input_shape[2],
-        )
+        assert test_model.model.input_shape == (None, *input_shape)
+        assert test_model.model.output_shape == (None, *input_shape)
         assert len(test_model.model.layers) == 49
 
     def test_load_weights(self, trained_model, input_shape):
@@ -34,18 +24,8 @@ class TestUnet:
         test_model = self.model(input_shape)
         test_model.model.load_weights(trained_model)
 
-        assert test_model.model.input_shape == (
-            None,
-            input_shape[0],
-            input_shape[1],
-            input_shape[2],
-        )
-        assert test_model.model.output_shape == (
-            None,
-            input_shape[0],
-            input_shape[1],
-            input_shape[2],
-        )
+        assert test_model.model.input_shape == (None, *input_shape)
+        assert test_model.model.output_shape == (None, *input_shape)
         assert len(test_model.model.layers) == 49
         assert test_model.model.get_weights() is not None
 
@@ -57,7 +37,7 @@ class TestUnet:
         )
 
         decoded_image = test_model.reconstructed
-        assert decoded_image.shape == (1, input_shape[0], input_shape[1], input_shape[2])
+        assert decoded_image.shape == (1, *input_shape)
 
         assert decoded_image.min() >= 0
         assert decoded_image.max() <= 1
