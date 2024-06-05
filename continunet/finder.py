@@ -1,4 +1,4 @@
-"""Compile modules for source finding"""
+"""Compile ContinUNet modules into Finder class for source finding."""
 
 from continunet.image.fits import ImageSquare
 from continunet.image.pre_processing import PreProcessor
@@ -8,9 +8,12 @@ from continunet.network.unet import Unet
 class Finder:
     """Class for source finding in radio continuum images."""
 
-    def __init__(self, image, sources, layers: int = 4):
-        # TODO: must be fits object, add check
+    def __init__(self, image: str, sources, layers: int = 4):
+        if not image.endswith(".fits"):
+            raise ValueError("File must be a .fits file.")
         self.image = image
+        if layers != 4:
+            raise ValueError("Number of layers must be 4.")
         self.layers = layers
         self.sources = sources
 
