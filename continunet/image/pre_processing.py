@@ -4,11 +4,15 @@ import numpy as np
 
 from astropy.nddata import Cutout2D
 
+from continunet.image.fits import ImageSquare
+
 
 class PreProcessor:
     """Pre-process image data for inference."""
 
     def __init__(self, image: object, layers: int = 4):
+        if not isinstance(image, ImageSquare):
+            raise ValueError("Image must be an ImageSquare object.")
         self.image = image
         self.layers = layers
         self.data = self.image.data
@@ -31,6 +35,7 @@ class PreProcessor:
             self.data.shape[1] / 2 ** self.layers, int
         ):
             minimum_size = self.data.shape[0] // (2 ** self.layers) * (2 ** self.layers)
+            print(f"Trimming image to fit network from {self.data.shape[0]} to {minimum_size}.")
             trimmed_image = Cutout2D(
                 self.data,
                 (self.image.header["CRPIX1"], self.image.header["CRPIX2"]),
