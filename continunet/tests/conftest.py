@@ -10,9 +10,7 @@ from continunet.image.fits import ImageSquare
 def fits_file(tmp_path):
     """Fixture for creating a temporary FITS file with random data."""
     data = np.random.randint(0, 10, size=(1, 256, 256), dtype=np.uint8)
-    # import ipdb; ipdb.set_trace(context=25)
     hdu = fits.PrimaryHDU(data)
-
     header = fits.Header()
 
     header["SIMPLE"] = True

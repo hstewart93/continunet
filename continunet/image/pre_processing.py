@@ -20,7 +20,7 @@ class PreProcessor:
             raise ValueError("Image data contains only NaNs.")
         if np.isnan(self.data).any():
             self.data = np.nan_to_num(self.data, False)
-        return self
+        return self.data
 
     def reshape(self):
         """Reshape the image data for the network. Shape must be divisible by 2 ** n layers."""
@@ -41,16 +41,16 @@ class PreProcessor:
             self.wcs = trimmed_image.wcs
 
         self.data = self.data.reshape(1, *self.data.shape, 1)
-        return self
+        return self.data
 
     def normalise(self):
         """Normalise the image data."""
         self.data = (self.data - np.min(self.data)) / (np.max(self.data) - np.min(self.data))
-        return self
+        return self.data
 
     def process(self):
         """Process the image data."""
         self.clean_nans()
         self.reshape()
         self.normalise()
-        return self
+        return self.data
