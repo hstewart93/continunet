@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from astropy.nddata import Cutout2D
+
 
 class PreProcessor:
     """Pre-process image data for inference."""
@@ -11,10 +13,6 @@ class PreProcessor:
         self.layers = layers
         self.data = self.image.data
         self.wcs = self.image.wcs
-
-        self.clean_nans()
-        self.reshape()
-        self.normalise()
 
     def clean_nans(self):
         """Check for NaNs in the image data."""
@@ -32,10 +30,15 @@ class PreProcessor:
         if not isinstance(self.data.shape[0] / 2 ** self.layers, int) or not isinstance(
             self.data.shape[1] / 2 ** self.layers, int
         ):
-            self.data = self.data[
-                : self.data.shape[0] // (2 ** self.layers) * (2 ** self.layers),
-                : self.data.shape[1] // (2 ** self.layers) * (2 ** self.layers),
-            ]
+            minimum_size = self.data.shape[0] // (2 ** self.layers) * (2 ** self.layers)
+            trimmed_image = Cutout2D(
+                self.data,
+                (self.image.header["CRPIX1"], self.image.header["CRPIX2"]),
+                (minimum_size, minimum_size),
+                wcs=self.wcs,
+            )
+            self.data = trimmed_image.data
+            self.wcs = trimmed_image.wcs
 
         self.data = self.data.reshape(1, *self.data.shape, 1)
         return self
@@ -43,4 +46,11 @@ class PreProcessor:
     def normalise(self):
         """Normalise the image data."""
         self.data = (self.data - np.min(self.data)) / (np.max(self.data) - np.min(self.data))
+        return self
+
+    def process(self):
+        """Process the image data."""
+        self.clean_nans()
+        self.reshape()
+        self.normalise()
         return self

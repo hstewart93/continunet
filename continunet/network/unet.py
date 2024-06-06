@@ -31,7 +31,6 @@ class Unet:
         output_activation: str = "sigmoid",
         model: Model = None,
         reconstructed: np.ndarray = None,
-        decode: bool = False,
     ):
         """
         Initialise the UNet model.
@@ -61,8 +60,6 @@ class Unet:
             A pre-built model, populated by the build_model method.
         reconstructed : np.ndarray
             The reconstructed image, created by the decode_image method.
-        decode : bool
-            Whether to decode an image on class instantiation, default is False.
         """
         self.input_shape = input_shape
         self.filters = filters
@@ -74,27 +71,8 @@ class Unet:
         self.output_activation = output_activation
         self.model = model
         self.reconstructed = reconstructed
-        self.decode = decode
 
         self.model = self.build_model()
-
-        if self.decode:
-            if self.trained_model is None or self.image is None:
-                raise ValueError("Trained model and image arguments are required to decode image.")
-            if isinstance(self.image, np.ndarray) is False:
-                raise TypeError("Image must be a numpy array.")
-            if len(self.image.shape) != 4:
-                raise ValueError("Image must be 4D numpy array for example (1, 256, 256, 1).")
-            if self.image.shape[3] != 1:
-                raise ValueError("Input image must be grayscale.")
-            if (
-                self.image.shape[0] % 2 ** self.layers != 0
-                and self.image.shape[1] % 2 ** self.layers != 0
-            ):
-                raise ValueError("Image shape should be divisible by 2^layers.")
-
-            self.model = self.compile_model()
-            self.reconstructed = self.decode_image()
 
     def convolutional_block(self, input_tensor, filters, kernel_size=3):
         """Convolutional block for UNet."""
@@ -168,5 +146,21 @@ class Unet:
 
     def decode_image(self):
         """Returns images decoded by a trained model."""
+        if self.trained_model is None or self.image is None:
+            raise ValueError("Trained model and image arguments are required to decode image.")
+        if isinstance(self.image, np.ndarray) is False:
+            raise TypeError("Image must be a numpy array.")
+        if len(self.image.shape) != 4:
+            raise ValueError("Image must be 4D numpy array for example (1, 256, 256, 1).")
+        if self.image.shape[3] != 1:
+            raise ValueError("Input image must be grayscale.")
+        if (
+            self.image.shape[0] % 2 ** self.layers != 0
+            and self.image.shape[1] % 2 ** self.layers != 0
+        ):
+            raise ValueError("Image shape should be divisible by 2^layers.")
+
+        self.model = self.compile_model()
         self.model.load_weights(self.trained_model)
-        return self.model.predict(self.image)
+        self.reconstructed = self.model.predict(self.image)
+        return self.reconstructed

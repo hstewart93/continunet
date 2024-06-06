@@ -34,6 +34,16 @@ class TestImageSquare:
 
         assert image.shape == (1, 256, 256)
 
+    @pytest.mark.parametrize("key", ["CRPIX1", "CRPIX2"])
+    def test_check_header(self, fits_file, key):
+        """Test the check_header method"""
+
+        image = self.model(fits_file)
+
+        del image.header[key]
+        with pytest.raises(KeyError):
+            image.check_header()
+
     def test_wcs(self, fits_file):
         """Test the wcs property"""
 

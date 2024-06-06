@@ -18,6 +18,13 @@ class TestUnet:
         assert test_model.model.output_shape == (None, *input_shape)
         assert len(test_model.model.layers) == 49
 
+    def test_build_model_invalid_input_shape(
+        self, invalid_image, trained_model, invalid_image_input_shape
+    ):
+        """Test the decode_image method with invalid input shape"""
+        with pytest.raises(ValueError):
+            self.model(invalid_image_input_shape, image=invalid_image, trained_model=trained_model)
+
     def test_load_weights(self, trained_model, input_shape):
         """Test the load_weights method"""
 
@@ -32,11 +39,9 @@ class TestUnet:
     def test_decode_image(self, grayscale_image, trained_model, input_shape):
         """Test the decode_image method"""
 
-        test_model = self.model(
-            input_shape, image=grayscale_image, trained_model=trained_model, decode=True
-        )
+        test_model = self.model(input_shape, image=grayscale_image, trained_model=trained_model)
 
-        decoded_image = test_model.reconstructed
+        decoded_image = test_model.decode_image()
         assert decoded_image.shape == (1, *input_shape)
 
         assert decoded_image.min() >= 0
@@ -44,37 +49,26 @@ class TestUnet:
 
     def test_decode_image_invalid_image_type(self, trained_model, input_shape):
         """Test the decode_image method with invalid image type"""
+        test_model = self.model(input_shape, image="invalid", trained_model=trained_model)
         with pytest.raises(TypeError):
-            self.model(input_shape, image="invalid", trained_model=trained_model, decode=True)
-
-    def test_decode_image_invalid_input_shape(
-        self, invalid_image, trained_model, invalid_image_input_shape
-    ):
-        """Test the decode_image method with invalid input shape"""
-        with pytest.raises(ValueError):
-            self.model(
-                invalid_image_input_shape,
-                image=invalid_image,
-                trained_model=trained_model,
-                decode=True,
-            )
+            test_model.decode_image()
 
     def test_decode_image_no_trained_model(self, grayscale_image, grayscale_image_input_shape):
         """Test the decode_image method with no trained model"""
+        test_model = self.model(grayscale_image_input_shape, image=grayscale_image)
         with pytest.raises(ValueError):
-            self.model(grayscale_image_input_shape, image=grayscale_image, decode=True)
+            test_model.decode_image()
 
     def test_decode_image_no_image(self, trained_model, input_shape):
         """Test the decode_image method with no image"""
+        test_model = self.model(input_shape, trained_model=trained_model)
         with pytest.raises(ValueError):
-            self.model(input_shape, trained_model=trained_model, decode=True)
+            test_model.decode_image()
 
     def test_decode_image_colour_image(self, trained_model, colour_image, colour_image_input_shape):
         """Test the decode_image method with a colour image"""
+        test_model = self.model(
+            colour_image_input_shape, image=colour_image, trained_model=trained_model,
+        )
         with pytest.raises(ValueError):
-            self.model(
-                colour_image_input_shape,
-                image=colour_image,
-                trained_model=trained_model,
-                decode=True,
-            )
+            test_model.decode_image()

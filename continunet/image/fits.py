@@ -10,13 +10,13 @@ from astropy.wcs import WCS
 class FitsImage(ABC):
     """Abstract model for an image imported from FITS format."""
 
-    def __init__(self, path, data=None, header=None, wcs=None, beam_size=None, shape=None):
+    def __init__(self, path):
         self.path = path
-        self.data = data
-        self.header = header
-        self.wcs = wcs
-        self.beam_size = beam_size
-        self.shape = shape
+        self.data = None
+        self.header = None
+        self.wcs = None
+        self.beam_size = None
+        self.shape = None
 
         self.load()
 
@@ -27,25 +27,25 @@ class FitsImage(ABC):
 
         with fits.open(self.path) as fits_object:
 
-            if self.data is None:
-                self.data = fits_object[0].data
-                # Convert byte ordering to little-endian as FITS is stored as big-endian
-                # and is incompatible with torch
-                self.data = self.data.astype(np.float32)
-
-            if self.header is None:
-                self.header = fits_object[0].header
-
-            if self.wcs is None:
-                self.wcs = WCS(self.header)
-
-            if self.beam_size is None:
-                self.beam_size = self.get_beam_size()
-
-            if self.shape is None:
-                self.shape = self.data.shape
+            self.data = fits_object[0].data
+            # Convert byte ordering to little-endian as FITS is stored as big-endian
+            # and is incompatible with torch
+            self.data = self.data.astype(np.float32)
+            self.header = fits_object[0].header
+            self.wcs = WCS(self.header)
+            self.beam_size = self.get_beam_size()
+            self.shape = self.data.shape
+            self.check_header()
 
         return self
+
+    def check_header(self):
+        """Check the header contains required information."""
+        # TODO: check keys required for wcs object.
+        required_keys = ["CRPIX1", "CRPIX2"]
+        for key in required_keys:
+            if key not in self.header:
+                raise KeyError(f"Header does not contain '{key}' (image information).")
 
     def get_beam_size(self):
         """Return the beam size in arcseconds."""

@@ -44,6 +44,7 @@ def fits_file(tmp_path):
     header["RESTFRQ"] = 1.42040575200e09
     header["RADESYS"] = "ICRS"
 
+    hdu.header = header
     path = tmp_path / "test.fits"
     hdu.writeto(path)
 
