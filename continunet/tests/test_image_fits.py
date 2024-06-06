@@ -14,7 +14,6 @@ class TestImageSquare:
         """Test the load method"""
 
         image = self.model(fits_file)
-
         assert image.data is not None
         assert image.header is not None
         assert image.wcs is not None
@@ -24,15 +23,22 @@ class TestImageSquare:
         with pytest.raises(ValueError):
             self.model(None)
 
-        assert image.header["NAXIS"] == 2
-        assert image.header["NAXIS1"] == 100
-        assert image.header["NAXIS2"] == 100
+        assert image.header["NAXIS"] == 3
+        assert image.header["NAXIS1"] == 256
+        assert image.header["NAXIS2"] == 256
+        assert image.header["NAXIS3"] == 1
         assert image.header["BMAJ"] == 0.01
         assert image.header["BMIN"] == 0.01
         assert image.header["CDELT1"] == -0.0001
         assert image.header["CDELT2"] == 0.0001
 
-        assert image.shape == (100, 100)
+        assert image.shape == (1, 256, 256)
+
+    def test_wcs(self, fits_file):
+        """Test the wcs property"""
+
+        image = self.model(fits_file)
+        assert image.wcs.has_celestial
 
     def test_get_beam_size(self, fits_file):
         """Test the get_beam_size method"""
