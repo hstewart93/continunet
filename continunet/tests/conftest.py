@@ -51,12 +51,6 @@ def fits_file(tmp_path):
 
 
 @pytest.fixture
-def trained_model():
-    """Fixture for a trained model."""
-    return "continunet/network/trained_model.h5"
-
-
-@pytest.fixture
 def grayscale_image():
     """Generate a random 256x256x1 image array."""
     image = np.random.randint(0, 10, size=(256, 256, 1), dtype=np.uint8)
