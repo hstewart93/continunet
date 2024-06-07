@@ -1,4 +1,5 @@
-"""Pre-processing module for images."""
+"""Processing module for pre-processing input images and post-processing output
+images from the network."""
 
 import math
 import numpy as np
@@ -37,6 +38,10 @@ class PreProcessor:
             self.data.shape[1] / 2 ** self.layers, int
         ):
             minimum_size = self.data.shape[0] // (2 ** self.layers) * (2 ** self.layers)
+            print(
+                "Image dimensions cannot be processed by the network, "
+                f"rehsaping image from {self.data.shape} to {(minimum_size, minimum_size)}."
+            )
             self.cutout_object = Cutout2D(
                 self.data,
                 (self.image.header["CRPIX1"], self.image.header["CRPIX2"]),
@@ -63,8 +68,8 @@ class PreProcessor:
 
 
 class PostProcessor:
-    """"Class for post-processing the output of the neural network, for
-    producing segmentation maps and source catalogues."""
+    """Post-processes the output of the neural network, generating segmentation
+    maps and source catalogues."""
 
     def __init__(
         self, reconstructed_image: np.ndarray, pre_processed_image: object, threshold="default"
@@ -95,7 +100,7 @@ class PostProcessor:
         else:
             threshold = self.threshold
         binary = self.reconstructed_image > threshold
-        self.segmentation_map = binary.astype(int)[0, :, :, :]
+        self.segmentation_map = binary.astype(int)[0, :, :, 0]
         return self.segmentation_map
 
     def get_labelled_map(self):
