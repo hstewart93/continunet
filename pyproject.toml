@@ -20,6 +20,8 @@ dependencies = [
     "numpy>=1.26",
     "keras>=3.3",
     "tensorflow>=2.16",
+    "scikit-image>=0.23",
+    "pandas>=2.2",
 ]
 
 [project.optional-dependencies]

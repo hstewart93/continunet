@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from continunet.image.pre_processing import PreProcessor
+from continunet.image.processing import PreProcessor
 
 
 class TestPreProcessing:
