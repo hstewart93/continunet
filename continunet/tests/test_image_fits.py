@@ -34,6 +34,11 @@ class TestImageSquare:
 
         assert image.shape == (1, 256, 256)
 
+    def test_load_no_celestial(self, fits_file_no_celestial):
+        """Test the check_header method with no celestial information"""
+        with pytest.raises(ValueError):
+            self.model(fits_file_no_celestial)
+
     @pytest.mark.parametrize("key", ["CRPIX1", "CRPIX2"])
     def test_check_header(self, fits_file, key):
         """Test the check_header method"""
