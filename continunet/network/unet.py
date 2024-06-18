@@ -21,15 +21,46 @@ class Unet:
 
     def __init__(
         self,
-        input_shape,
-        filters=16,
-        dropout=0.05,
-        batch_normalisation=True,
-        trained_model=None,
-        image=None,
-        layers=4,
-        output_activation="sigmoid",
+        input_shape: tuple,
+        filters: int = 16,
+        dropout: float = 0.05,
+        batch_normalisation: bool = True,
+        trained_model: str = None,
+        image: np.ndarray = None,
+        layers: int = 4,
+        output_activation: str = "sigmoid",
+        model: Model = None,
+        reconstructed: np.ndarray = None,
     ):
+        """
+        Initialise the UNet model.
+
+        Parameters
+        ----------
+        input_shape : tuple
+            The shape of the input image.
+        filters : int
+            The number of filters to use in the convolutional layers, default is 16.
+        dropout : float
+            The dropout rate, default is 0.05.
+        batch_normalisation : bool
+            Whether to use batch normalisation, default is True.
+        trained_model : str
+            The path to a trained model.
+        image : np.ndarray
+            The image to decode. Image must be 2D given as 4D numpy array, e.g. (1, 256, 256, 1).
+            Image must be grayscale, e.g. not (1, 256, 256, 3). Image array row columns must
+            be divisible by 2^layers, e.g. 256 % 2^4 == 0.
+        layers : int
+            The number of encoding and decoding layers, default is 4.
+        output_activation : str
+            The activation function for the output layer, either sigmoid or softmax.
+            Default is sigmoid.
+        model : keras.models.Model
+            A pre-built model, populated by the build_model method.
+        reconstructed : np.ndarray
+            The reconstructed image, created by the decode_image method.
+        """
         self.input_shape = input_shape
         self.filters = filters
         self.dropout = dropout
@@ -38,6 +69,10 @@ class Unet:
         self.image = image
         self.layers = layers
         self.output_activation = output_activation
+        self.model = model
+        self.reconstructed = reconstructed
+
+        self.model = self.build_model()
 
     def convolutional_block(self, input_tensor, filters, kernel_size=3):
         """Convolutional block for UNet."""
@@ -78,7 +113,7 @@ class Unet:
         input_image = Input(self.input_shape, name="img")
         current = input_image
 
-        # Encoder Path
+        # Encoding Path
         convolutional_tensors = []
         for layer in range(self.layers):
             convolutional_tensor, current = self.encoding_block(
@@ -91,7 +126,7 @@ class Unet:
             current, filters=self.filters * 2 ** self.layers
         )
 
-        # Decoder Path
+        # Decoding Path
         current = latent_convolutional_tensor
         for layer in reversed(range(self.layers)):
             current = self.decoding_block(
@@ -104,15 +139,13 @@ class Unet:
 
     def compile_model(self):
         """Compile the UNet model."""
-        model = self.build_model()
-        model.compile(
+        self.model.compile(
             optimizer=Adam(), loss="binary_crossentropy", metrics=["accuracy", "iou_score"]
         )
-        return model
+        return self.model
 
     def decode_image(self):
         """Returns images decoded by a trained model."""
-        model = self.compile_model()
         if self.trained_model is None or self.image is None:
             raise ValueError("Trained model and image arguments are required to decode image.")
         if isinstance(self.image, np.ndarray) is False:
@@ -121,8 +154,13 @@ class Unet:
             raise ValueError("Image must be 4D numpy array for example (1, 256, 256, 1).")
         if self.image.shape[3] != 1:
             raise ValueError("Input image must be grayscale.")
-        if self.image.shape[0] % 256 != 0 and self.image.shape[1] % 256 != 0:
-            raise ValueError("Image shape should be divisible by 256.")
+        if (
+            self.image.shape[0] % 2 ** self.layers != 0
+            and self.image.shape[1] % 2 ** self.layers != 0
+        ):
+            raise ValueError("Image shape should be divisible by 2^layers.")
 
-        model.load_weights(self.trained_model)
-        return model.predict(self.image)
+        self.model = self.compile_model()
+        self.model.load_weights(self.trained_model)
+        self.reconstructed = self.model.predict(self.image)
+        return self.reconstructed
