@@ -40,7 +40,7 @@ class Finder:
         data = pre_processor.process()
 
         # Run U-Net
-        with importlib.resources.path("continunet/network", "trained_model.h5") as path:
+        with importlib.resources.path("continunet.network", "trained_model.h5") as path:
             unet = Unet(data.shape[1:4], trained_model=path, image=data, layers=self.layers)
         self.reconstructed_image = unet.decode_image()
 
