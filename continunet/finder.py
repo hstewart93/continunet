@@ -1,10 +1,11 @@
 """Compile ContinUNet modules into Finder class for source finding."""
 
+import importlib.resources
 import time
 
 from astropy.table import Table
 
-from continunet.constants import GREEN, RESET, TRAINED_MODEL
+from continunet.constants import GREEN, RESET
 from continunet.image.fits import ImageSquare
 from continunet.image.processing import PreProcessor, PostProcessor
 from continunet.network.unet import Unet
@@ -39,7 +40,8 @@ class Finder:
         data = pre_processor.process()
 
         # Run U-Net
-        unet = Unet(data.shape[1:4], trained_model=TRAINED_MODEL, image=data, layers=self.layers)
+        with importlib.resources.path("continunet/network", "trained_model.h5") as path:
+            unet = Unet(data.shape[1:4], trained_model=path, image=data, layers=self.layers)
         self.reconstructed_image = unet.decode_image()
 
         # Post-process reconstructed image
