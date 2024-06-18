@@ -10,11 +10,16 @@ from astropy.nddata import Cutout2D
 from skimage.filters import threshold_triangle
 from skimage.measure import label, regionprops_table
 
+from continunet.image.fits import ImageSquare
+from continunet.constants import BLUE, MAGENTA, RESET
+
 
 class PreProcessor:
     """Pre-process image data for inference."""
 
     def __init__(self, image: object, layers: int = 4):
+        if not isinstance(image, ImageSquare):
+            raise ValueError("Image must be an ImageSquare object.")
         self.image = image
         self.layers = layers
         self.data = self.image.data
@@ -39,8 +44,8 @@ class PreProcessor:
         ):
             minimum_size = self.data.shape[0] // (2 ** self.layers) * (2 ** self.layers)
             print(
-                "Image dimensions cannot be processed by the network, "
-                f"rehsaping image from {self.data.shape} to {(minimum_size, minimum_size)}."
+                f"{MAGENTA}Image dimensions cannot be processed by the network, "
+                f"rehsaping image from {self.data.shape} to {(minimum_size, minimum_size)}.{RESET}"
             )
             self.cutout_object = Cutout2D(
                 self.data,
@@ -95,7 +100,9 @@ class PostProcessor:
         """Calculate the segmentation map from the reconstructed image.
         Only binary segmentation maps are currently supported."""
         if self.threshold == "default":
-            print("Using default thresholding method (scikit-image triangle threshold).")
+            print(
+                f"{BLUE}Using default thresholding method (scikit-image triangle threshold).{RESET}"
+            )
             threshold = threshold_triangle(self.reconstructed_image)
         else:
             threshold = self.threshold
@@ -146,6 +153,11 @@ class PostProcessor:
     def calculate_ellipse_area(bmaj, bmin):
         """Function to calculate the area of an ellipse."""
         return np.pi * bmaj * bmin
+
+    @staticmethod
+    def convert_orientation_to_position_angle(orientation):
+        """Convert the orientation of the source to position angle in degrees."""
+        return np.degrees(orientation + (np.pi / 2))
 
     def generate_2d_gaussian_beam(self):
         """Generate a 2D Gaussian beam for a given fits image."""
@@ -245,6 +257,10 @@ class PostProcessor:
             catalogue.axis_major_length / 2, catalogue.axis_minor_length / 2
         )
 
+        catalogue["position_angle"] = self.convert_orientation_to_position_angle(
+            catalogue.orientation
+        )
+
         catalogue = catalogue[
             (catalogue["axis_major_length"] >= 1) & (catalogue["axis_minor_length"] >= 1)
         ]
@@ -258,7 +274,6 @@ class PostProcessor:
             columns={
                 "axis_major_length": "bmaj",
                 "axis_minor_length": "bmin",
-                "orientation": "position_angle",
                 "image_intensity": "flux_uncorrected",
                 "intensity_sum_corrected": "flux",
                 "centroid-0": "y_location_original",
