@@ -267,8 +267,6 @@ class PostProcessor:
 
         catalogue = self.correct_flux_densities(catalogue, self.segmentation_map)
 
-        # TODO: convert orientation to degrees as for SDC1
-
         # rename and drop columns
         catalogue = catalogue.rename(
             columns={
