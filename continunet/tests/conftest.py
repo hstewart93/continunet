@@ -51,6 +51,38 @@ def fits_file(tmp_path):
 
 
 @pytest.fixture
+def fits_file_no_celestial(tmp_path):
+    """Fixture for creating a temporary FITS file with no celestial information."""
+    data = np.random.randint(0, 10, size=(1, 256, 256), dtype=np.uint8)
+    hdu = fits.PrimaryHDU(data)
+    header = fits.Header()
+
+    header["SIMPLE"] = True
+    header["BITPIX"] = -32
+    header["NAXIS"] = 3
+    header["NAXIS1"] = 256
+    header["NAXIS2"] = 256
+    header["NAXIS3"] = 1
+    header["BMAJ"] = 0.01
+    header["BMIN"] = 0.01
+    header["CRPIX1"] = 128
+    header["CRPIX2"] = 128
+
+    hdu.header = header
+    path = tmp_path / "test.fits"
+    hdu.writeto(path)
+
+    yield path
+    path.unlink()
+
+
+@pytest.fixture
+def trained_model():
+    """Fixture for a trained model."""
+    return "continunet/network/trained_model.h5"
+
+
+@pytest.fixture
 def grayscale_image():
     """Generate a random 256x256x1 image array."""
     image = np.random.randint(0, 10, size=(256, 256, 1), dtype=np.uint8)

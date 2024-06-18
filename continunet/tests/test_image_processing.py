@@ -11,6 +11,11 @@ class TestPreProcessing:
 
     model = PreProcessor
 
+    def test_invalid_image_type(self, invalid_image):
+        """Raise ValueError if invalid image type."""
+        with pytest.raises(ValueError):
+            self.model(invalid_image)
+
     def test_reshape_valid_image(self, valid_image_object, valid_image_shape):
         """Test reshape image method for a valid image shape."""
         image = self.model(valid_image_object)
@@ -24,7 +29,6 @@ class TestPreProcessing:
         image.reshape()
 
         assert image.data.shape == valid_image_shape
-        # test wcs shape
         assert image.wcs.array_shape == valid_image_shape[1:3]
 
     def test_reshape_wcs(self, valid_image_object, valid_image_shape):

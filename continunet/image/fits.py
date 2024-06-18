@@ -33,6 +33,8 @@ class FitsImage(ABC):
             self.data = self.data.astype(np.float32)
             self.header = fits_object[0].header
             self.wcs = WCS(self.header)
+            if not self.wcs.has_celestial:
+                raise ValueError("WCS object does not contain celestial information.")
             self.beam_size = self.get_beam_size()
             self.shape = self.data.shape
             self.check_header()
@@ -41,7 +43,6 @@ class FitsImage(ABC):
 
     def check_header(self):
         """Check the header contains required information."""
-        # TODO: check keys required for wcs object.
         required_keys = ["CRPIX1", "CRPIX2"]
         for key in required_keys:
             if key not in self.header:
