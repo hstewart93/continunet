@@ -37,8 +37,10 @@ ci = [
 ]
 
 [tool.setuptools]
-packages = ["continunet"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["continunet"]
 
 [tool.setuptools.package-data]
 "continunet.network" = ["trained_model.h5"]
