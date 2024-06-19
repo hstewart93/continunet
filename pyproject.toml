@@ -35,3 +35,12 @@ ci = [
     "twine",
     "build"
 ]
+
+[tool.setuptools]
+packages = ["continunet"]
+
+[tool.setuptools.package-data]
+"continunet.network" = ["trained_model.h5"]
+
+[tool.setuptools.include-package-data]
+include = true
