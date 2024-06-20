@@ -11,7 +11,7 @@ from skimage.filters import threshold_triangle
 from skimage.measure import label, regionprops_table
 
 from continunet.image.fits import ImageSquare
-from continunet.constants import BLUE, MAGENTA, RESET
+from continunet.constants import BLUE, CYAN, MAGENTA, RESET
 
 
 class PreProcessor:
@@ -66,6 +66,7 @@ class PreProcessor:
 
     def process(self):
         """Process the image data."""
+        print(f"{CYAN}Pre-processing image...{RESET}")
         self.reshape()
         self.clean_nans()
         self.normalise()
@@ -79,14 +80,20 @@ class PostProcessor:
     def __init__(
         self, reconstructed_image: np.ndarray, pre_processed_image: object, threshold="default"
     ):
+        if reconstructed_image is None:
+            raise ValueError("Reconstructed image must be provided.")
         if not isinstance(reconstructed_image, np.ndarray):
-            raise ValueError("Reconstructed image must be a numpy array.")
+            raise TypeError("Reconstructed image must be a numpy array.")
         self.reconstructed_image = reconstructed_image
+
+        if pre_processed_image is None:
+            raise ValueError("Pre-processed image must be provided.")
         if not isinstance(pre_processed_image, PreProcessor):
-            raise ValueError("Pre-processed image must be a PreProcessor object.")
+            raise TypeError("Pre-processed image must be a PreProcessor object.")
         self.pre_processed_image = pre_processed_image
         self.threshold = threshold
         self.segmentation_map = None
+
         self.labelled_map = None
         self.model_map = None
         self.residuals = None
@@ -99,6 +106,7 @@ class PostProcessor:
     def get_segmentation_map(self):
         """Calculate the segmentation map from the reconstructed image.
         Only binary segmentation maps are currently supported."""
+        print(f"{CYAN}Generating segmentation map...{RESET}")
         if self.threshold == "default":
             print(
                 f"{BLUE}Using default thresholding method (scikit-image triangle threshold).{RESET}"
@@ -113,12 +121,14 @@ class PostProcessor:
     def get_labelled_map(self):
         """Label the binary segmentation map."""
         self.get_segmentation_map()
+        print(f"{CYAN}Labelling sources...{RESET}")
         self.labelled_map = label(self.segmentation_map, connectivity=2)
         return self.labelled_map
 
     def get_raw_sources(self):
         """Get the raw sources from the labelled map."""
         self.get_labelled_map()
+        print(f"{CYAN}Calculating source properties...{RESET}")
         properties = [
             "centroid",
             "orientation",
@@ -129,6 +139,7 @@ class PostProcessor:
             "label",
             "perimeter",
         ]
+
         properties_table = regionprops_table(
             self.labelled_map, self.cutout_object.data, properties=properties
         )
@@ -238,7 +249,11 @@ class PostProcessor:
         """Clean the raw sources to produce a catalogue of sources."""
         self.get_raw_sources()
 
+        print(f"{CYAN}Correcting source catalogue...{RESET}")
         catalogue = self.raw_sources.copy()
+        catalogue = catalogue[
+            (catalogue["axis_major_length"] >= 1) & (catalogue["axis_minor_length"] >= 1)
+        ]
         catalogue["image_intensity"] = catalogue["image_intensity"].apply(self.sum_array)
 
         catalogue["x_location"] = catalogue["centroid-1"] + self.cutout_object.xmin_original
@@ -246,8 +261,8 @@ class PostProcessor:
 
         wcs_object = self.pre_processed_image.wcs
         ra, dec = wcs_object.all_pix2world(catalogue.x_location, catalogue.y_location, 0)
-        catalogue["RA"] = ra
-        catalogue["Dec"] = dec
+        catalogue["right_acsension"] = ra
+        catalogue["declination"] = dec
 
         area_correction_factor = self.calculate_area_correction_factor()
         catalogue = catalogue[catalogue.image_intensity > 0]
@@ -260,10 +275,6 @@ class PostProcessor:
         catalogue["position_angle"] = self.convert_orientation_to_position_angle(
             catalogue.orientation
         )
-
-        catalogue = catalogue[
-            (catalogue["axis_major_length"] >= 1) & (catalogue["axis_minor_length"] >= 1)
-        ]
 
         catalogue = self.correct_flux_densities(catalogue, self.segmentation_map)
 

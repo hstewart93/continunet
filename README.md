@@ -38,3 +38,28 @@ pre-commit install
 Now pre-commit hooks should run on `git commit`.
 
 The run the test suite use `pytest`.
+
+## Basic Usage
+The package currently support `.FITS` type images. To perform source finding you can import the `finder` module,
+
+```
+from continunet.finder import Finder
+```
+
+Load your image file,
+
+```
+finder = Finder("<filepath>")
+```
+
+To produce a source catalogue and populate the `Finder` instance,
+
+```
+sources = finder.find()
+```
+
+Export source catalogue using `finder.export_sources` as `.csv` by default or `.FITS` by setting `export_fits=True`,
+
+```
+finder.export_sources("<filepath>", export_fits=<Boolean>)
+```

@@ -4,6 +4,7 @@ import pytest
 from astropy.io import fits
 
 from continunet.image.fits import ImageSquare
+from continunet.image.processing import PreProcessor
 
 
 @pytest.fixture
@@ -163,3 +164,9 @@ def image_object_all_nans(fits_file):
     image.data = np.full_like(image.data, np.nan)
 
     return image
+
+
+@pytest.fixture
+def pre_processor_object(valid_image_object):
+    """Fixture for a pre-processor object."""
+    return PreProcessor(valid_image_object, 4)

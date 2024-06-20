@@ -6,6 +6,8 @@ import numpy as np
 from astropy.io import fits
 from astropy.wcs import WCS
 
+from continunet.constants import CYAN, RESET
+
 
 class FitsImage(ABC):
     """Abstract model for an image imported from FITS format."""
@@ -22,6 +24,7 @@ class FitsImage(ABC):
 
     def load(self):
         """Load fits image from file and populate model args."""
+        print(f"{CYAN}Loading FITS image from {self.path}...{RESET}")
         if not self.path:
             raise ValueError("Path to FITS file not provided.")
 

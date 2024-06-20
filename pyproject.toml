@@ -14,13 +14,13 @@ version = "0.0.8"
 authors = [
     { name="Hattie Stewart" }
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "astropy>=6.0",
     "numpy>=1.26",
     "keras>=3.3",
     "tensorflow>=2.16",
-    "scikit-image>=0.23",
+    "scikit-image>=0.20",
     "pandas>=2.2",
 ]
 
