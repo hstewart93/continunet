@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "continunet"
-version = "0.0.7"
+version = "0.0.8"
 authors = [
     { name="Hattie Stewart" }
 ]
@@ -37,10 +37,8 @@ ci = [
 ]
 
 [tool.setuptools]
+packages = ["continunet", "continunet.image", "continunet.network"]
 include-package-data = true
-
-[tool.setuptools.packages.find]
-where = ["continunet"]
 
 [tool.setuptools.package-data]
 "continunet.network" = ["trained_model.h5"]
