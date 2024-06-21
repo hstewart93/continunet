@@ -73,7 +73,7 @@ class Finder:
         return self.sources
 
     def export_sources(self, path: str, export_fits=False):
-        """Export source catalogue to a directory."""
+        """Export source catalogue to a directory. Use export_fits=True to save as FITS."""
         if self.sources is None:
             raise ValueError("No sources to export.")
         if export_fits:
