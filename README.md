@@ -1,4 +1,5 @@
 # ContinUNet
+[![Pytest](https://github.com/hstewart93/continunet/actions/workflows/pytest.yml/badge.svg)](https://github.com/hstewart93/continunet/actions/workflows/pytest.yml)
 Source finding package for radio continuum data powered by U-Net segmentation algorithm.
 
 ## Installation
@@ -65,6 +66,31 @@ To produce a source catalogue and populate the `Finder` instance:
 sources = finder.find()
 ```
 
+If you want to calculate the model map and residuals image as part of source finding, use the `Finder.find()` method with `generate_maps=True`:
+
+```python
+sources = finder.find(generate_maps=True)
+model_map = finder.model_map
+residuals = finder.residuals
+```
+
+Alternatively, manually calculate model map and residual images using:
+
+```python
+model_map = finder.get_model_map()
+residuals = finder.get_residuals()
+```
+
+Useful available attributes of the `Finder` object are:
+```python
+finder.sources # cleaned source catalogue
+finder.reconstructed_image # predicted image reconstructed by unet module
+finder.segmentation_map # predicted segmentation map
+finder.model_map # model map of cleaned predicted sources
+finder.residuals # residual image as numpy array
+finder.raw_sources # sources from labelled segmentation map before cleaning
+```
+
 Export source catalogue using `finder.export_sources` as `.csv` by default or `.FITS` by setting `export_fits=True`:
 
 ```python
@@ -90,3 +116,12 @@ Source parameters extracted are:
 | `position_angle`           | position angle of source ellipse in degrees                                                            |
 | `correction_factor`        | correction factor applied to flux density measurement to account for undersampling of synthesised beam |
 | `flux_density`             | corrected flux density                                                                                 |
+
+## Development
+ContinUNet is subject to ongoing development. To see the backlog of features and bug fixes please go to the [project board](https://github.com/users/hstewart93/projects/4/views/1). Please raise any feature requests or bugs as [issues](https://github.com/hstewart93/continunet/issues).
+
+The following features will be added in the next release:
+
+1. Exporting processed images to `.npy` and `.FTIS` [(#33)](https://github.com/hstewart93/continunet/issues/33)
+2. Inference for non-square images [(#27)](https://github.com/hstewart93/continunet/issues/27)
+3. Taking cutout of `ImageSquare` object before inference [(#28)](https://github.com/hstewart93/continunet/issues/28)
