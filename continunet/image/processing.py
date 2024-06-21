@@ -80,6 +80,20 @@ class PostProcessor:
     def __init__(
         self, reconstructed_image: np.ndarray, pre_processed_image: object, threshold="default"
     ):
+        """Initialise the PostProcessor class.
+
+        Parameters
+        ----------
+        reconstructed_image : np.ndarray
+            The reconstructed image from the neural network.
+            Must be a numpy array.
+        pre_processed_image : object
+            The pre-processed image object. Must be a PreProcessor object.
+        threshold : str
+            The thresholding method to use for the segmentation map.
+            Default is "default" which uses the scikit-image triangle threshold.
+            To use a custom threshold, provide a float value.
+        """
         if reconstructed_image is None:
             raise ValueError("Reconstructed image must be provided.")
         if not isinstance(reconstructed_image, np.ndarray):
@@ -281,12 +295,12 @@ class PostProcessor:
         # rename and drop columns
         catalogue = catalogue.rename(
             columns={
-                "axis_major_length": "bmaj",
-                "axis_minor_length": "bmin",
-                "image_intensity": "flux_uncorrected",
-                "intensity_sum_corrected": "flux",
-                "centroid-0": "y_location_original",
-                "centroid-1": "x_location_original",
+                "axis_major_length": "major_axis",
+                "axis_minor_length": "minor_axis",
+                "image_intensity": "flux_density_uncorrected",
+                "intensity_sum_corrected": "flux_density",
+                "centroid-0": "y_location_cutout",
+                "centroid-1": "x_location_cutout",
             },
         )
         catalogue = catalogue.drop(columns=["coords", "perimeter"])

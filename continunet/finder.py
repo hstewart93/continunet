@@ -15,6 +15,16 @@ class Finder:
     """Class for source finding in radio continuum images."""
 
     def __init__(self, image: str, layers: int = 4):
+        """Initialise the Finder class.
+
+        Parameters
+        ----------
+        image : str
+            The path to the FITS image.
+        layers : int
+            The number of encoding and decoding layers in the U-Net model.
+            Layers is set by default to 4, and cannot currently be changed.
+        """
         if not image.endswith(".fits"):
             raise ValueError("File must be a .fits file.")
         self.image = image
