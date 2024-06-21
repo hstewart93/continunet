@@ -62,7 +62,7 @@ class Finder:
 
         end_time = time.time()
         print(
-            f"{GREEN}ContinUnet found {len(self.sources)} sources "
+            f"{GREEN}ContinUNet found {len(self.sources)} sources "
             f"in {(end_time - start_time):.2f} seconds.{RESET}"
         )
 
