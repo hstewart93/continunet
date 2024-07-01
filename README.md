@@ -3,6 +3,13 @@
 
 Source finding package for radio continuum data powered by U-Net segmentation algorithm.
 
+- [Paper](https://academic.oup.com/rasti/article/3/1/315/7685538?utm_source=advanceaccess&utm_campaign=rasti&utm_medium=email#supplementary-data)
+- [Installation](#installation)
+- [Developer Installation](#developer-installation)
+- [Quickstart](#quickstart)
+- [Training Dataset](https://www.kaggle.com/datasets/harrietstewart/continunet)
+- [Next Release](#development)
+
 ## Installation
 The project is available on [PyPI](https://pypi.org/project/continunet/), to install latest stable release use:
 
@@ -48,7 +55,7 @@ Now pre-commit hooks should run on `git commit`.
 
 To run the test suite use `pytest`.
 
-## Basic Usage
+## Quickstart
 The package currently support `.FITS` type images. To perform source finding you can import the `finder` module:
 
 ```python
