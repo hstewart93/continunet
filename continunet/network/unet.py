@@ -15,6 +15,8 @@ from keras.layers import (
 from keras.models import Model
 from tensorflow.keras.optimizers import Adam
 
+from continunet.constants import CYAN, RESET
+
 
 class Unet:
     """UNet model for image segmentation."""
@@ -146,6 +148,7 @@ class Unet:
 
     def decode_image(self):
         """Returns images decoded by a trained model."""
+        print(f"{CYAN}Predicting source segmentation using pre-trained model...{RESET}")
         if self.trained_model is None or self.image is None:
             raise ValueError("Trained model and image arguments are required to decode image.")
         if isinstance(self.image, np.ndarray) is False:

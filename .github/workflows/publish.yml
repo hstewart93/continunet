@@ -37,5 +37,3 @@ jobs:
         files: dist/*
         name: ${{ steps.branch_info.outputs.TAG }}
         tag_name: ${{ steps.branch_info.outputs.TAG }}
-
-
