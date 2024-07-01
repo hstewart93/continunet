@@ -31,6 +31,7 @@ class Finder:
         if layers != 4:
             raise ValueError("Number of layers must be 4.")
         self.layers = layers
+        self.image_object = None
         self.sources = None
         self.reconstructed_image = None
         self.post_processor = None
@@ -43,10 +44,10 @@ class Finder:
         """Find sources in a continuum image."""
         start_time = time.time()
         # Load image
-        image_object = ImageSquare(self.image)
+        self.image_object = ImageSquare(self.image)
 
         # Pre-process image
-        pre_processor = PreProcessor(image_object, self.layers)
+        pre_processor = PreProcessor(self.image_object, self.layers)
         data = pre_processor.process()
 
         # Run U-Net

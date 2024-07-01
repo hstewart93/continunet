@@ -325,6 +325,7 @@ class PostProcessor:
 
     def get_residuals(self, use_raw=False):
         """Calculate the residuals from the input image and the model map."""
-        self.get_model_map(use_raw)
+        if self.model_map is None:
+            self.get_model_map(use_raw)
         self.residuals = self.cutout_object.data - self.model_map
         return self.residuals
