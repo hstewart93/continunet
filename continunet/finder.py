@@ -40,7 +40,7 @@ class Finder:
         self.residuals = None
         self.raw_sources = None
 
-    def find(self, generate_maps=False, use_raw=False, threshold="default"):
+    def find(self, generate_maps=False, threshold="default"):
         """Find sources in a continuum image."""
         start_time = time.time()
         # Load image
