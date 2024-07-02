@@ -7,7 +7,7 @@ import pandas as pd
 
 from astropy.modeling.functional_models import Gaussian2D
 from astropy.nddata import Cutout2D
-from skimage.filters import threshold_triangle
+from skimage.filters import threshold_triangle, threshold_otsu
 from skimage.measure import label, regionprops_table
 
 from continunet.image.fits import ImageSquare
@@ -77,9 +77,7 @@ class PostProcessor:
     """Post-processes the output of the neural network, generating segmentation
     maps and source catalogues."""
 
-    def __init__(
-        self, reconstructed_image: np.ndarray, pre_processed_image: object, threshold="default"
-    ):
+    def __init__(self, reconstructed_image: np.ndarray, pre_processed_image: object, threshold):
         """Initialise the PostProcessor class.
 
         Parameters
@@ -121,14 +119,24 @@ class PostProcessor:
         """Calculate the segmentation map from the reconstructed image.
         Only binary segmentation maps are currently supported."""
         print(f"{CYAN}Generating segmentation map...{RESET}")
+        if (
+            self.threshold != "default"
+            and self.threshold != "otsu"
+            and not isinstance(self.threshold, float)
+        ):
+            raise ValueError("Threshold must be 'default', 'otsu', or a float value.")
         if self.threshold == "default":
             print(
                 f"{BLUE}Using default thresholding method (scikit-image triangle threshold).{RESET}"
             )
-            threshold = threshold_triangle(self.reconstructed_image)
-        else:
-            threshold = self.threshold
-        binary = self.reconstructed_image > threshold
+            self.threshold = threshold_triangle(self.reconstructed_image)
+
+        if self.threshold == "otsu":
+            print(f"{BLUE}Using Otsu thresholding method.{RESET}")
+            self.threshold = threshold_otsu(self.reconstructed_image)
+        if isinstance(self.threshold, float):
+            print(f"{BLUE}Using custom threshold value: {self.threshold}.{RESET}")
+        binary = self.reconstructed_image > self.threshold
         self.segmentation_map = binary.astype(int)[0, :, :, 0]
         return self.segmentation_map
 
