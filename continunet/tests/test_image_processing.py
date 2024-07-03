@@ -1,13 +1,13 @@
-"""Tests for pre-processing image data."""
+"""Tests for processing image data."""
 
 import numpy as np
 import pytest
 
-from continunet.image.pre_processing import PreProcessor
+from continunet.image.processing import PreProcessor, PostProcessor
 
 
 class TestPreProcessing:
-    """Test suite for the PreProcessing model."""
+    """Tests for the PreProcessing model."""
 
     model = PreProcessor
 
@@ -69,3 +69,31 @@ class TestPreProcessing:
         assert image.data.max() == 1
         assert not np.isnan(image.data).any()
         assert image.wcs.array_shape == valid_image_shape[1:3]
+
+
+class TestPostProcessing:
+    """Tests for the PostProcessing model."""
+
+    model = PostProcessor
+
+    def test_invalid_reconstructed_image_type(self, pre_processor_object):
+        """Raise ValueError if invalid image type."""
+        invalid_image = "invalid_image"
+        with pytest.raises(TypeError):
+            self.model(invalid_image, pre_processor_object, threshold="default")
+
+    def test_invalid_pre_processor_type(self, grayscale_image):
+        """Raise ValueError if invalid image type."""
+        invalid_pre_processor = "invalid_pre_processor"
+        with pytest.raises(TypeError):
+            self.model(grayscale_image, invalid_pre_processor, threshold="default")
+
+    def test_no_reconstructed_image(self, pre_processor_object):
+        """Raise ValueError if no reconstructed image."""
+        with pytest.raises(ValueError):
+            self.model(None, pre_processor_object, threshold="default")
+
+    def test_no_pre_processor(self, grayscale_image):
+        """Raise ValueError if no pre-processor."""
+        with pytest.raises(ValueError):
+            self.model(grayscale_image, None, threshold="default")

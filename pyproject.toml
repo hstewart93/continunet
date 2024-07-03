@@ -10,16 +10,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "continunet"
-version = "0.0.2"
+version = "0.0.8"
 authors = [
     { name="Hattie Stewart" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "astropy>=6.0",
     "numpy>=1.26",
     "keras>=3.3",
     "tensorflow>=2.16",
+    "scikit-image>=0.20",
+    "pandas>=2.2",
 ]
 
 [project.optional-dependencies]
@@ -31,5 +33,13 @@ dev = [
 ]
 ci = [
     "twine",
-    "build"
+    "build",
+    "pytest",
 ]
+
+[tool.setuptools]
+packages = ["continunet", "continunet.image", "continunet.network"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"continunet.network" = ["trained_model.h5"]
