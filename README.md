@@ -7,7 +7,7 @@ Source finding package for radio continuum data powered by U-Net segmentation al
 - [Installation](#installation)
 - [Developer Installation](#developer-installation)
 - [Quickstart](#quickstart)
-- [Example Notebook](https://github.com/hstewart93/continunet/tree/finder/continunet/user_example.ipynb)
+- [Example Notebook](https://github.com/hstewart93/continunet/blob/main/continunet/user_example.ipynb)
 - [Training Dataset](https://www.kaggle.com/datasets/harrietstewart/continunet)
 - [Next Release](#development)
 
