@@ -38,12 +38,25 @@ class TestPreProcessing:
         assert image.wcs.array_shape == valid_image_shape[1:3]
 
     def test_normalise(self, valid_image_object):
-        """Test image normalisation."""
+        """Test image normalization using z-score + arcsinh."""
+        raw_data = valid_image_object.data.copy()
         image = self.model(valid_image_object)
         image.normalise()
 
-        assert image.data.min() == 0
-        assert image.data.max() == 1
+        # Check finite values
+        assert np.isfinite(image.data).all()
+
+        # Check transformation compressed dynamic range
+        raw_range = raw_data.max() - raw_data.min()
+        transformed_range = image.data.max() - image.data.min()
+        assert transformed_range < raw_range
+
+        # Check data roughly centered
+        assert abs(np.median(image.data)) < 1
+
+        # Check reasonable bounds
+        assert image.data.min() > -10
+        assert image.data.max() < 10
 
     def test_clean_nans(self, nan_image_object):
         """Test cleaning NaNs from the image data."""
@@ -65,8 +78,7 @@ class TestPreProcessing:
         image.process()
 
         assert image.data.shape == valid_image_shape
-        assert image.data.min() == 0
-        assert image.data.max() == 1
+        assert abs(np.median(image.data)) < 1
         assert not np.isnan(image.data).any()
         assert image.wcs.array_shape == valid_image_shape[1:3]
 
