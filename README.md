@@ -86,8 +86,8 @@ residuals = finder.residuals
 Alternatively, manually calculate model map and residual images using:
 
 ```python
-model_map = finder.get_model_map()
-residuals = finder.get_residuals()
+model_map = finder.post_processor.get_model_map()
+residuals = finder.post_processor.get_residuals()
 ```
 
 Useful available attributes of the `Finder` object are:
