@@ -67,7 +67,9 @@ class TestUnet:
     def test_decode_image_colour_image(self, colour_image, colour_image_input_shape):
         """Test the decode_image method with a colour image"""
         test_model = self.model(
-            colour_image_input_shape, image=colour_image, trained_model=TRAINED_MODEL,
+            colour_image_input_shape,
+            image=colour_image,
+            trained_model=TRAINED_MODEL,
         )
         with pytest.raises(ValueError):
             test_model.decode_image()

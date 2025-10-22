@@ -118,21 +118,19 @@ class Unet:
         # Encoding Path
         convolutional_tensors = []
         for layer in range(self.layers):
-            convolutional_tensor, current = self.encoding_block(
-                current, self.filters * (2 ** layer)
-            )
+            convolutional_tensor, current = self.encoding_block(current, self.filters * (2**layer))
             convolutional_tensors.append((convolutional_tensor))
 
         # Latent Convolutional Block
         latent_convolutional_tensor = self.convolutional_block(
-            current, filters=self.filters * 2 ** self.layers
+            current, filters=self.filters * 2**self.layers
         )
 
         # Decoding Path
         current = latent_convolutional_tensor
         for layer in reversed(range(self.layers)):
             current = self.decoding_block(
-                current, convolutional_tensors[layer], self.filters * (2 ** layer)
+                current, convolutional_tensors[layer], self.filters * (2**layer)
             )
 
         outputs = Conv2D(1, (1, 1), activation=self.output_activation)(current)
@@ -157,10 +155,7 @@ class Unet:
             raise ValueError("Image must be 4D numpy array for example (1, 256, 256, 1).")
         if self.image.shape[3] != 1:
             raise ValueError("Input image must be grayscale.")
-        if (
-            self.image.shape[0] % 2 ** self.layers != 0
-            and self.image.shape[1] % 2 ** self.layers != 0
-        ):
+        if self.image.shape[0] % 2**self.layers != 0 and self.image.shape[1] % 2**self.layers != 0:
             raise ValueError("Image shape should be divisible by 2^layers.")
 
         self.model = self.compile_model()

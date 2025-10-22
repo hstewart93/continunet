@@ -39,10 +39,10 @@ class PreProcessor:
 
         self.data = np.squeeze(self.data)
         self.wcs = self.wcs.celestial
-        if not isinstance(self.data.shape[0] / 2 ** self.layers, int) or not isinstance(
-            self.data.shape[1] / 2 ** self.layers, int
+        if not isinstance(self.data.shape[0] / 2**self.layers, int) or not isinstance(
+            self.data.shape[1] / 2**self.layers, int
         ):
-            minimum_size = self.data.shape[0] // (2 ** self.layers) * (2 ** self.layers)
+            minimum_size = self.data.shape[0] // (2**self.layers) * (2**self.layers)
             print(
                 f"{MAGENTA}Image dimensions cannot be processed by the network, "
                 f"rehsaping image from {self.data.shape} to {(minimum_size, minimum_size)}.{RESET}"
@@ -61,7 +61,10 @@ class PreProcessor:
 
     def normalise(self):
         """Normalise the image data."""
-        self.data = (self.data - np.min(self.data)) / (np.max(self.data) - np.min(self.data))
+        mean = np.mean(self.data)
+        std = np.std(self.data)
+        z_scaled_data = (self.data - mean) / std
+        self.data = np.arcsinh(z_scaled_data)
         return self.data
 
     def process(self):
@@ -251,7 +254,7 @@ class PostProcessor:
         for undersampling the synthesized beam."""
         beam = self.generate_2d_gaussian_beam()
         beam_five_sigma = 5 * self.get_beam_size()
-        beam_five_sigma_area = np.pi * beam_five_sigma ** 2
+        beam_five_sigma_area = np.pi * beam_five_sigma**2
         for source_index, source in properties.iterrows():
             if source.area > beam_five_sigma_area:
                 correction_factor = 1

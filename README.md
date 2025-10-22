@@ -26,8 +26,8 @@ pip install git+https://github.com/hstewart93/continunet
 
 **ContinUNet has a `Python 3.9` minimum requirement.**
 
-## Developer Installation
-If you want to contribute to the repository, install as follows:
+## Developer Setup
+If you want to setup a developer environment, install as follows:
 
 Once you have cloned down this repository using `git clone`, cd into the app directory:
 
@@ -36,12 +36,12 @@ git clone git@github.com:hstewart93/continunet.git
 cd continunet
 ```
 
-Create a virtual environment for development, if you are using bash:
+Create a virtual environment for development, if you are using bash/zsh:
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -e .[dev,ci]
+pip install -e ".[dev,ci]"
 ```
 
 To exit the virtual environment use `deactivate`.
