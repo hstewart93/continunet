@@ -5,10 +5,13 @@ import math
 import numpy as np
 import pandas as pd
 
+from astropy.stats import sigma_clip
 from astropy.modeling.functional_models import Gaussian2D
 from astropy.nddata import Cutout2D
+from scipy import ndimage, interpolate
 from skimage.filters import threshold_triangle, threshold_otsu
 from skimage.measure import label, regionprops_table
+from skimage.morphology import remove_small_objects
 
 from continunet.image.fits import ImageSquare
 from continunet.constants import BLUE, CYAN, MAGENTA, RESET
@@ -117,8 +120,138 @@ class PostProcessor:
         self.header = self.pre_processed_image.image.header
         self.cutout_object = self.pre_processed_image.cutout_object
         self.gaussian_beam = None
+        self.rms_map = None
 
-    def get_segmentation_map(self):
+    def get_beam_fwhm(self):
+        """Get FWHM of the beam in pixels from the fits header."""
+        pixel_angular_size = self.header["CDELT2"]
+        beam_fwhm = self.header["BMAJ"]
+        return beam_fwhm / pixel_angular_size
+
+    def get_nan_mask(self):
+        """Get mask for nan values (MIGHTEE specific)"""
+        nan_image = self.cutout_object.data
+        nan_mask = np.zeros((nan_image.shape[0], nan_image.shape[1]))
+        self.nan_mask = np.where(nan_image != 0, 1, nan_mask)
+
+        return self.nan_mask
+
+    def estimate_noise_map(
+        self, image, box_size=100, step_size=30, sigma=3.0, max_iters=5, mask=None
+    ):
+        """
+        Estimate a spatially varying noise (RMS) map similar to PyBDSF.
+
+        Parameters
+        ----------
+        image : 2D np.ndarray
+            The input residual image (float).
+        box_size : int
+            Size of the local box (in pixels) for RMS estimation.
+        step_size : int
+            Step between box centers (in pixels). Controls sampling density.
+        sigma : float
+            Sigma-clipping threshold (number of sigma to clip).
+        max_iters : int
+            Maximum number of sigma-clipping iterations.
+        mask : 2D np.ndarray, optional
+            Boolean mask where True = ignore pixel (e.g., known sources).
+
+        Returns
+        -------
+        rms_map : 2D np.ndarray
+            Interpolated local RMS (noise) map.
+        mean_map : 2D np.ndarray
+            Interpolated local mean (background) map.
+        """
+
+        ny, nx = image.shape
+        if mask is None:
+            mask = np.zeros_like(image, dtype=bool)
+
+        # Coordinates of box centers
+        y_centers = np.arange(box_size // 2, ny - box_size // 2 + 1, step_size)
+        x_centers = np.arange(box_size // 2, nx - box_size // 2 + 1, step_size)
+
+        rms_grid = np.zeros((len(y_centers), len(x_centers)))
+        mean_grid = np.zeros_like(rms_grid)
+
+        # Loop over boxes
+        for iy, y0 in enumerate(y_centers):
+            for ix, x0 in enumerate(x_centers):
+                sub = image[
+                    y0 - box_size // 2 : y0 + box_size // 2, x0 - box_size // 2 : x0 + box_size // 2
+                ]
+                submask = mask[
+                    y0 - box_size // 2 : y0 + box_size // 2, x0 - box_size // 2 : x0 + box_size // 2
+                ]
+
+                # Exclude masked/NaN values
+                vals = sub[~submask & np.isfinite(sub)]
+                if len(vals) < 10:
+                    rms_grid[iy, ix] = np.nan
+                    mean_grid[iy, ix] = np.nan
+                    continue
+
+                # Sigma clipping
+                clipped = sigma_clip(vals, sigma=sigma, maxiters=max_iters)
+                mean_grid[iy, ix] = np.nanmean(clipped)
+                rms_grid[iy, ix] = np.nanstd(clipped)
+
+        # Coordinates for interpolation
+        # xx, yy = np.meshgrid(x_centers, y_centers)
+        # valid = np.isfinite(rms_grid)
+
+        # Interpolate onto full image grid
+        x_full = np.arange(nx)
+        y_full = np.arange(ny)
+
+        interp_func_rms = interpolate.RegularGridInterpolator(
+            (y_centers, x_centers), np.nan_to_num(rms_grid), bounds_error=False, fill_value=None
+        )  # None = extrapolate instead of NaN
+
+        interp_func_mean = interpolate.RegularGridInterpolator(
+            (y_centers, x_centers), np.nan_to_num(mean_grid), bounds_error=False, fill_value=None
+        )
+
+        # interp_func_rms = interpolate.RegularGridInterpolator(
+        #     (y_centers, x_centers),
+        # np.nan_to_num(rms_grid), bounds_error=False, fill_value=np.nan)
+        # interp_func_mean = interpolate.RegularGridInterpolator(
+        #     (y_centers, x_centers),
+        # np.nan_to_num(mean_grid), bounds_error=False, fill_value=np.nan)
+
+        yy_full, xx_full = np.meshgrid(y_full, x_full, indexing="ij")
+        points = np.stack((yy_full.ravel(), xx_full.ravel()), axis=-1)
+
+        rms_map = interp_func_rms(points).reshape(image.shape)
+        mean_map = interp_func_mean(points).reshape(image.shape)
+
+        # Optional: smooth final maps slightly to reduce interpolation noise
+        rms_map = ndimage.gaussian_filter(rms_map, sigma=box_size / 5)
+        mean_map = ndimage.gaussian_filter(mean_map, sigma=box_size / 5)
+
+        return rms_map, mean_map
+
+    def get_rms_map(self, rms_box="default"):
+        """Make RMS map using residual and model maps."""
+        # Get raw model map and residuals
+        raw_model_map = self.cutout_object.data * self.segmentation_map
+        raw_residuals = self.cutout_object.data - raw_model_map
+
+        print(f"{BLUE}Creating RMS map.{RESET}")
+        if rms_box == "default":
+            rms_box = math.floor(self.get_beam_fwhm()) * 10
+        rms_map, _ = self.estimate_noise_map(raw_residuals, box_size=rms_box)
+        self.get_nan_mask()
+        self.rms_map = np.where(
+            self.nan_mask == 0,
+            np.nan,
+            rms_map,
+        )
+        return raw_model_map, raw_residuals, self.rms_map
+
+    def get_segmentation_map(self, clean=True, sigma_snr=5.0):
         """Calculate the segmentation map from the reconstructed image.
         Only binary segmentation maps are currently supported."""
         print(f"{CYAN}Generating segmentation map...{RESET}")
@@ -141,18 +274,33 @@ class PostProcessor:
             print(f"{BLUE}Using custom threshold value: {self.threshold}.{RESET}")
         binary = self.reconstructed_image > self.threshold
         self.segmentation_map = binary.astype(int)[0, :, :, 0]
+
+        if clean:
+            print(f"{BLUE}Removing objects smaller than beam FWHM.{RESET}")
+            # remove objects smaller than the beam FWHM
+            min_pixels = self.get_beam_fwhm()
+            self.segmentation_map = remove_small_objects(
+                self.segmentation_map.astype(bool), min_size=min_pixels
+            )
+
+            # get rms map
+            raw_model_map, _, _ = self.get_rms_map()
+
+            snr_map = raw_model_map / self.rms_map
+            self.segmentation_map = (snr_map > sigma_snr).astype(np.uint8)
+
         return self.segmentation_map
 
-    def get_labelled_map(self):
+    def get_labelled_map(self, sigma_snr=5.0, rms_box="default"):
         """Label the binary segmentation map."""
-        self.get_segmentation_map()
+        self.get_segmentation_map(sigma_snr=5.0, rms_box="default")
         print(f"{CYAN}Labelling sources...{RESET}")
         self.labelled_map = label(self.segmentation_map, connectivity=2)
         return self.labelled_map
 
-    def get_raw_sources(self):
+    def get_raw_sources(self, sigma_snr=5.0, rms_box="default"):
         """Get the raw sources from the labelled map."""
-        self.get_labelled_map()
+        self.get_labelled_map(sigma_snr=5.0, rms_box="default")
         print(f"{CYAN}Calculating source properties...{RESET}")
         properties = [
             "centroid",
@@ -270,9 +418,9 @@ class PostProcessor:
             )
         return properties
 
-    def get_sources(self):
+    def get_sources(self, sigma_snr=5.0, rms_box="default"):
         """Clean the raw sources to produce a catalogue of sources."""
-        self.get_raw_sources()
+        self.get_raw_sources(sigma_snr=5.0, rms_box="default")
 
         print(f"{CYAN}Correcting source catalogue...{RESET}")
         catalogue = self.raw_sources.copy()
@@ -281,12 +429,10 @@ class PostProcessor:
         ]
         catalogue["image_intensity"] = catalogue["image_intensity"].apply(self.sum_array)
 
-        catalogue["x_location"] = catalogue["centroid-1"] + self.cutout_object.xmin_original
-        catalogue["y_location"] = catalogue["centroid-0"] + self.cutout_object.ymin_original
-
-        wcs_object = self.pre_processed_image.wcs
-        ra, dec = wcs_object.all_pix2world(catalogue.x_location, catalogue.y_location, 0)
-        catalogue["right_acsension"] = ra
+        ra, dec = self.cutout_object.wcs.all_pix2world(
+            catalogue["centroid-1"], catalogue["centroid-0"], 0
+        )
+        catalogue["right_ascension"] = ra
         catalogue["declination"] = dec
 
         area_correction_factor = self.calculate_area_correction_factor()
