@@ -251,7 +251,7 @@ class PostProcessor:
         raw_model_map = self.cutout_object.data * self.segmentation_map
         raw_residuals = self.cutout_object.data - raw_model_map
 
-        print(f"{CYAN}Creating RMS map.{RESET}")
+        print(f"{CYAN}Creating RMS map...{RESET}")
         if rms_box == "default":
             rms_box = math.floor(self.get_beam_fwhm()) * 10
         rms_map, _ = self.estimate_noise_map(raw_residuals, box_size=rms_box)
@@ -288,7 +288,7 @@ class PostProcessor:
         self.segmentation_map = binary.astype(int)[0, :, :, 0]
 
         if self.clean_maps:
-            print(f"{CYAN}Removing objects smaller than beam FWHM.{RESET}")
+            print(f"{CYAN}Removing objects smaller than beam FWHM...{RESET}")
             # remove objects smaller than the beam FWHM
             min_pixels = self.get_beam_fwhm()
             self.segmentation_map = remove_small_objects(
