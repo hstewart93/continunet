@@ -130,6 +130,8 @@ class PostProcessor:
         self.cutout_object = self.pre_processed_image.cutout_object
         self.gaussian_beam = None
         self.rms_map = None
+        self.clean_maps = True
+        self.nan_mask = None
 
     def get_beam_fwhm(self):
         """Get FWHM of the beam in pixels from the fits header."""
@@ -260,7 +262,7 @@ class PostProcessor:
         )
         return raw_model_map, raw_residuals, self.rms_map
 
-    def get_segmentation_map(self, clean=True):
+    def get_segmentation_map(self):
         """Calculate the segmentation map from the reconstructed image.
         Only binary segmentation maps are currently supported."""
         print(f"{CYAN}Generating segmentation map...{RESET}")
@@ -284,7 +286,7 @@ class PostProcessor:
         binary = self.reconstructed_image > self.threshold
         self.segmentation_map = binary.astype(int)[0, :, :, 0]
 
-        if clean:
+        if self.clean_maps:
             print(f"{BLUE}Removing objects smaller than beam FWHM.{RESET}")
             # remove objects smaller than the beam FWHM
             min_pixels = self.get_beam_fwhm()
