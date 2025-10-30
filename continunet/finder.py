@@ -40,7 +40,7 @@ class Finder:
         self.residuals = None
         self.raw_sources = None
 
-    def find(self, generate_maps=False, threshold="default"):
+    def find(self, generate_maps=False, threshold="default", sigma_snr=5.0, rms_box="default"):
         """Find sources in a continuum image."""
         start_time = time.time()
         # Load image
@@ -56,7 +56,13 @@ class Finder:
         self.reconstructed_image = unet.decode_image()
 
         # Post-process reconstructed image
-        self.post_processor = PostProcessor(unet.reconstructed, pre_processor, threshold=threshold)
+        self.post_processor = PostProcessor(
+            unet.reconstructed,
+            pre_processor,
+            threshold=threshold,
+            sigma_snr=sigma_snr,
+            rms_box=rms_box,
+        )
         self.sources = self.post_processor.get_sources()
         self.segmentation_map = self.post_processor.segmentation_map
         self.raw_sources = self.post_processor.raw_sources

@@ -83,7 +83,14 @@ class PostProcessor:
     """Post-processes the output of the neural network, generating segmentation
     maps and source catalogues."""
 
-    def __init__(self, reconstructed_image: np.ndarray, pre_processed_image: object, threshold):
+    def __init__(
+        self,
+        reconstructed_image: np.ndarray,
+        pre_processed_image: object,
+        threshold,
+        sigma_snr,
+        rms_box,
+    ):
         """Initialise the PostProcessor class.
 
         Parameters
@@ -110,6 +117,8 @@ class PostProcessor:
             raise TypeError("Pre-processed image must be a PreProcessor object.")
         self.pre_processed_image = pre_processed_image
         self.threshold = threshold
+        self.sigma_snr = sigma_snr
+        self.rms_box = rms_box
         self.segmentation_map = None
 
         self.labelled_map = None
@@ -251,7 +260,7 @@ class PostProcessor:
         )
         return raw_model_map, raw_residuals, self.rms_map
 
-    def get_segmentation_map(self, clean=True, sigma_snr=5.0):
+    def get_segmentation_map(self, clean=True):
         """Calculate the segmentation map from the reconstructed image.
         Only binary segmentation maps are currently supported."""
         print(f"{CYAN}Generating segmentation map...{RESET}")
@@ -284,23 +293,23 @@ class PostProcessor:
             )
 
             # get rms map
-            raw_model_map, _, _ = self.get_rms_map()
+            raw_model_map, _, _ = self.get_rms_map(self.rms_box)
 
             snr_map = raw_model_map / self.rms_map
-            self.segmentation_map = (snr_map > sigma_snr).astype(np.uint8)
+            self.segmentation_map = (snr_map > self.sigma_snr).astype(np.uint8)
 
         return self.segmentation_map
 
-    def get_labelled_map(self, sigma_snr=5.0, rms_box="default"):
+    def get_labelled_map(self):
         """Label the binary segmentation map."""
-        self.get_segmentation_map(sigma_snr=5.0, rms_box="default")
+        self.get_segmentation_map()
         print(f"{CYAN}Labelling sources...{RESET}")
         self.labelled_map = label(self.segmentation_map, connectivity=2)
         return self.labelled_map
 
-    def get_raw_sources(self, sigma_snr=5.0, rms_box="default"):
+    def get_raw_sources(self):
         """Get the raw sources from the labelled map."""
-        self.get_labelled_map(sigma_snr=5.0, rms_box="default")
+        self.get_labelled_map()
         print(f"{CYAN}Calculating source properties...{RESET}")
         properties = [
             "centroid",
@@ -418,9 +427,9 @@ class PostProcessor:
             )
         return properties
 
-    def get_sources(self, sigma_snr=5.0, rms_box="default"):
+    def get_sources(self):
         """Clean the raw sources to produce a catalogue of sources."""
-        self.get_raw_sources(sigma_snr=5.0, rms_box="default")
+        self.get_raw_sources()
 
         print(f"{CYAN}Correcting source catalogue...{RESET}")
         catalogue = self.raw_sources.copy()
