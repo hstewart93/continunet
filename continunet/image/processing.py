@@ -90,6 +90,7 @@ class PostProcessor:
         threshold,
         sigma_snr,
         rms_box,
+        clean_maps,
     ):
         """Initialise the PostProcessor class.
 
