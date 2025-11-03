@@ -298,8 +298,9 @@ class PostProcessor:
             # get rms map
             raw_model_map, _, _ = self.get_rms_map(self.rms_box)
 
-            snr_map = raw_model_map / self.rms_map
-            self.segmentation_map = (snr_map > self.sigma_snr).astype(np.uint8)
+            if self.sigma_snr:
+                snr_map = raw_model_map / self.rms_map
+                self.segmentation_map = (snr_map > self.sigma_snr).astype(np.uint8)
 
         return self.segmentation_map
 

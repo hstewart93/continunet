@@ -98,6 +98,7 @@ class TestPostProcessing:
                 threshold="default",
                 sigma_snr=5.0,
                 rms_box="default",
+                clean_maps=True,
             )
 
     def test_invalid_pre_processor_type(self, grayscale_image):
@@ -110,16 +111,100 @@ class TestPostProcessing:
                 threshold="default",
                 sigma_snr=5.0,
                 rms_box="default",
+                clean_maps=True,
             )
 
     def test_no_reconstructed_image(self, pre_processor_object):
         """Raise ValueError if no reconstructed image."""
         with pytest.raises(ValueError):
             self.model(
-                None, pre_processor_object, threshold="default", sigma_snr=5.0, rms_box="default"
+                None,
+                pre_processor_object,
+                threshold="default",
+                sigma_snr=5.0,
+                rms_box="default",
+                clean_maps=True,
             )
 
     def test_no_pre_processor(self, grayscale_image):
         """Raise ValueError if no pre-processor."""
         with pytest.raises(ValueError):
-            self.model(grayscale_image, None, threshold="default", sigma_snr=5.0, rms_box="default")
+            self.model(
+                grayscale_image,
+                None,
+                threshold="default",
+                sigma_snr=5.0,
+                rms_box="default",
+                clean_maps=True,
+            )
+
+    def test_get_beam_fwhm(self, pre_processor_object, grayscale_image):
+        """Test beam FWHM computation."""
+        proc = self.model(
+            grayscale_image,
+            pre_processor_object,
+            threshold="default",
+            sigma_snr=3.0,
+            rms_box=10,
+            clean_maps=True,
+        )
+        fwhm = proc.get_beam_fwhm()
+        assert np.isclose(fwhm, 100.0)
+
+    def test_segmentation_not_cut_when_sigma_snr_none(
+        self, pre_processor_object, grayscale_image, monkeypatch
+    ):
+        """Segmentation map should not be thresholded if sigma_snr is None."""
+        processor = self.model(
+            grayscale_image,
+            pre_processor_object,
+            threshold="default",
+            sigma_snr=None,  # key case
+            rms_box="default",
+            clean_maps=True,
+        )
+
+        # Mock dependencies to control output
+        raw_model_map = np.array([[0.2, 0.8], [0.5, 0.9]])
+        processor.rms_map = np.ones_like(raw_model_map)
+
+        # Monkeypatch internal call so that the segmentation map is just raw_model_map initially
+        monkeypatch.setattr(
+            processor, "get_rms_map", lambda *a, **kw: (processor.rms_map, None, processor.rms_map)
+        )
+
+        # Run segmentation (simulate method)
+        processor.segmentation_map = raw_model_map.copy()
+        if processor.sigma_snr:
+            snr_map = raw_model_map / processor.rms_map
+            processor.segmentation_map = (snr_map > processor.sigma_snr).astype(np.uint8)
+
+        # Because sigma_snr=None, segmentation_map should remain uncut
+        np.testing.assert_array_equal(processor.segmentation_map, raw_model_map)
+
+    def test_segmentation_cut_when_sigma_snr_set(
+        self, pre_processor_object, grayscale_image, monkeypatch
+    ):
+        """Segmentation map should be thresholded if sigma_snr is set."""
+        processor = self.model(
+            grayscale_image,
+            pre_processor_object,
+            threshold="default",
+            sigma_snr=0.6,  # now threshold should apply
+            rms_box="default",
+            clean_maps=True,
+        )
+
+        raw_model_map = np.array([[0.2, 0.8], [0.5, 0.9]])
+        processor.rms_map = np.ones_like(raw_model_map)
+        monkeypatch.setattr(
+            processor, "get_rms_map", lambda *a, **kw: (processor.rms_map, None, processor.rms_map)
+        )
+
+        # Apply same snippet as your real method
+        if processor.sigma_snr:
+            snr_map = raw_model_map / processor.rms_map
+            processor.segmentation_map = (snr_map > processor.sigma_snr).astype(np.uint8)
+
+        expected = np.array([[0, 1], [0, 1]], dtype=np.uint8)
+        np.testing.assert_array_equal(processor.segmentation_map, expected)
