@@ -1,7 +1,7 @@
-continunet.network package
+continunet.network
 ==========================
 
-continunet.network.unet
+continunet.network.unet module
 ------------------------------
 
 .. automodule:: continunet.network.unet
@@ -9,7 +9,3 @@ continunet.network.unet
    :show-inheritance:
    :undoc-members:
 
-.. automodule:: continunet.network
-   :members:
-   :show-inheritance:
-   :undoc-members:
