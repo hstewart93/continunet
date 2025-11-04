@@ -18,7 +18,9 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="continunet.network package" href="continunet.network.html" />
+    <link rel="prev" title="continunet package" href="continunet.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,57 +42,28 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">continunet.image package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-continunet.image.fits">continunet.image.fits module</a><ul>
-<li><a class="reference internal" href="#continunet.image.fits.FitsImage"><code class="docutils literal notranslate"><span class="pre">FitsImage</span></code></a><ul>
-<li><a class="reference internal" href="#continunet.image.fits.FitsImage.check_header"><code class="docutils literal notranslate"><span class="pre">FitsImage.check_header()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.fits.FitsImage.get_beam_size"><code class="docutils literal notranslate"><span class="pre">FitsImage.get_beam_size()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.fits.FitsImage.load"><code class="docutils literal notranslate"><span class="pre">FitsImage.load()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="continunet.html">continunet package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="continunet.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">continunet.image package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-continunet.image.fits">continunet.image.fits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-continunet.image.processing">continunet.image.processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-continunet.image">Module contents</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#continunet.image.fits.ImageSquare"><code class="docutils literal notranslate"><span class="pre">ImageSquare</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="continunet.network.html">continunet.network package</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-continunet.image.processing">continunet.image.processing module</a><ul>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor"><code class="docutils literal notranslate"><span class="pre">PostProcessor</span></code></a><ul>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.calculate_area_correction_factor"><code class="docutils literal notranslate"><span class="pre">PostProcessor.calculate_area_correction_factor()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.calculate_ellipse_area"><code class="docutils literal notranslate"><span class="pre">PostProcessor.calculate_ellipse_area()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.convert_orientation_to_position_angle"><code class="docutils literal notranslate"><span class="pre">PostProcessor.convert_orientation_to_position_angle()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.correct_flux_densities"><code class="docutils literal notranslate"><span class="pre">PostProcessor.correct_flux_densities()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.estimate_noise_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.estimate_noise_map()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.generate_2d_gaussian_beam"><code class="docutils literal notranslate"><span class="pre">PostProcessor.generate_2d_gaussian_beam()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_beam_fwhm"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_beam_fwhm()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_beam_size"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_beam_size()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_labelled_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_labelled_map()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_model_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_model_map()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_nan_mask"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_nan_mask()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_raw_sources"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_raw_sources()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_residuals"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_residuals()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_rms_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_rms_map()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_segmentation_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_segmentation_map()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_source_mask"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_source_mask()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_sources"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_sources()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.pad_to_target_shape"><code class="docutils literal notranslate"><span class="pre">PostProcessor.pad_to_target_shape()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.sum_array"><code class="docutils literal notranslate"><span class="pre">PostProcessor.sum_array()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#continunet.image.processing.PreProcessor"><code class="docutils literal notranslate"><span class="pre">PreProcessor</span></code></a><ul>
-<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.clean_nans"><code class="docutils literal notranslate"><span class="pre">PreProcessor.clean_nans()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.normalise"><code class="docutils literal notranslate"><span class="pre">PreProcessor.normalise()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.process"><code class="docutils literal notranslate"><span class="pre">PreProcessor.process()</span></code></a></li>
-<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.reshape"><code class="docutils literal notranslate"><span class="pre">PreProcessor.reshape()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="continunet.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="continunet.html#module-continunet.constants">continunet.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="continunet.html#module-continunet.finder">continunet.finder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="continunet.html#module-continunet">Module contents</a></li>
 </ul>
 </li>
 </ul>
-</li>
-<li><a class="reference internal" href="#module-continunet.image">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -105,6 +78,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="continunet.html">continunet package</a></li>
       <li class="breadcrumb-item active">continunet.image package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/continunet.image.rst.txt" rel="nofollow"> View page source</a>
@@ -344,7 +318,10 @@ Only binary segmentation maps are currently supported.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="continunet.html" class="btn btn-neutral float-left" title="continunet package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="continunet.network.html" class="btn btn-neutral float-right" title="continunet.network package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
