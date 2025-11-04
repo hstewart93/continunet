@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>continunet.image package &mdash; ContinUNet v0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ccb7d911"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ContinUNet
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">continunet.image package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-continunet.image.fits">continunet.image.fits module</a><ul>
+<li><a class="reference internal" href="#continunet.image.fits.FitsImage"><code class="docutils literal notranslate"><span class="pre">FitsImage</span></code></a><ul>
+<li><a class="reference internal" href="#continunet.image.fits.FitsImage.check_header"><code class="docutils literal notranslate"><span class="pre">FitsImage.check_header()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.fits.FitsImage.get_beam_size"><code class="docutils literal notranslate"><span class="pre">FitsImage.get_beam_size()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.fits.FitsImage.load"><code class="docutils literal notranslate"><span class="pre">FitsImage.load()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#continunet.image.fits.ImageSquare"><code class="docutils literal notranslate"><span class="pre">ImageSquare</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-continunet.image.processing">continunet.image.processing module</a><ul>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor"><code class="docutils literal notranslate"><span class="pre">PostProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.calculate_area_correction_factor"><code class="docutils literal notranslate"><span class="pre">PostProcessor.calculate_area_correction_factor()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.calculate_ellipse_area"><code class="docutils literal notranslate"><span class="pre">PostProcessor.calculate_ellipse_area()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.convert_orientation_to_position_angle"><code class="docutils literal notranslate"><span class="pre">PostProcessor.convert_orientation_to_position_angle()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.correct_flux_densities"><code class="docutils literal notranslate"><span class="pre">PostProcessor.correct_flux_densities()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.estimate_noise_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.estimate_noise_map()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.generate_2d_gaussian_beam"><code class="docutils literal notranslate"><span class="pre">PostProcessor.generate_2d_gaussian_beam()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_beam_fwhm"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_beam_fwhm()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_beam_size"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_beam_size()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_labelled_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_labelled_map()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_model_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_model_map()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_nan_mask"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_nan_mask()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_raw_sources"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_raw_sources()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_residuals"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_residuals()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_rms_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_rms_map()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_segmentation_map"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_segmentation_map()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_source_mask"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_source_mask()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.get_sources"><code class="docutils literal notranslate"><span class="pre">PostProcessor.get_sources()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.pad_to_target_shape"><code class="docutils literal notranslate"><span class="pre">PostProcessor.pad_to_target_shape()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PostProcessor.sum_array"><code class="docutils literal notranslate"><span class="pre">PostProcessor.sum_array()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#continunet.image.processing.PreProcessor"><code class="docutils literal notranslate"><span class="pre">PreProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.clean_nans"><code class="docutils literal notranslate"><span class="pre">PreProcessor.clean_nans()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.normalise"><code class="docutils literal notranslate"><span class="pre">PreProcessor.normalise()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.process"><code class="docutils literal notranslate"><span class="pre">PreProcessor.process()</span></code></a></li>
+<li><a class="reference internal" href="#continunet.image.processing.PreProcessor.reshape"><code class="docutils literal notranslate"><span class="pre">PreProcessor.reshape()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-continunet.image">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ContinUNet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">continunet.image package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/continunet.image.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="continunet-image-package">
+<h1>continunet.image package<a class="headerlink" href="#continunet-image-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-continunet.image.fits">
+<span id="continunet-image-fits-module"></span><h2>continunet.image.fits module<a class="headerlink" href="#module-continunet.image.fits" title="Link to this heading"></a></h2>
+<p>Models for pre-processing FITS image data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="continunet.image.fits.FitsImage">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">continunet.image.fits.</span></span><span class="sig-name descname"><span class="pre">FitsImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/fits.html#FitsImage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.fits.FitsImage" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract model for an image imported from FITS format.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.fits.FitsImage.check_header">
+<span class="sig-name descname"><span class="pre">check_header</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/fits.html#FitsImage.check_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.fits.FitsImage.check_header" title="Link to this definition"></a></dt>
+<dd><p>Check the header contains required information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.fits.FitsImage.get_beam_size">
+<span class="sig-name descname"><span class="pre">get_beam_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/fits.html#FitsImage.get_beam_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.fits.FitsImage.get_beam_size" title="Link to this definition"></a></dt>
+<dd><p>Return the beam size in arcseconds.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.fits.FitsImage.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/fits.html#FitsImage.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.fits.FitsImage.load" title="Link to this definition"></a></dt>
+<dd><p>Load fits image from file and populate model args.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="continunet.image.fits.ImageSquare">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">continunet.image.fits.</span></span><span class="sig-name descname"><span class="pre">ImageSquare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/fits.html#ImageSquare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.fits.ImageSquare" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#continunet.image.fits.FitsImage" title="continunet.image.fits.FitsImage"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitsImage</span></code></a></p>
+<p>Model for a 2D FITS image.</p>
+</dd></dl>
+
+</section>
+<section id="module-continunet.image.processing">
+<span id="continunet-image-processing-module"></span><h2>continunet.image.processing module<a class="headerlink" href="#module-continunet.image.processing" title="Link to this heading"></a></h2>
+<p>Processing module for pre-processing input images and post-processing output
+images from the network.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">continunet.image.processing.</span></span><span class="sig-name descname"><span class="pre">PostProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reconstructed_image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_processed_image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_snr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rms_box</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_maps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Post-processes the output of the neural network, generating segmentation
+maps and source catalogues.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.calculate_area_correction_factor">
+<span class="sig-name descname"><span class="pre">calculate_area_correction_factor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.calculate_area_correction_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.calculate_area_correction_factor" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate the area correction factor for a given image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.calculate_ellipse_area">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_ellipse_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bmaj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bmin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.calculate_ellipse_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.calculate_ellipse_area" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate the area of an ellipse.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.convert_orientation_to_position_angle">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_orientation_to_position_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.convert_orientation_to_position_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.convert_orientation_to_position_angle" title="Link to this definition"></a></dt>
+<dd><p>Convert the orientation of the source to position angle in degrees.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.correct_flux_densities">
+<span class="sig-name descname"><span class="pre">correct_flux_densities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted_map</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.correct_flux_densities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.correct_flux_densities" title="Link to this definition"></a></dt>
+<dd><p>Correct the flux densities of the sources in the cutout
+for undersampling the synthesized beam.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.estimate_noise_map">
+<span class="sig-name descname"><span class="pre">estimate_noise_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.estimate_noise_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.estimate_noise_map" title="Link to this definition"></a></dt>
+<dd><p>Estimate a spatially varying noise (RMS) map similar to PyBDSF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>2D np.ndarray</em>) – The input residual image (float).</p></li>
+<li><p><strong>box_size</strong> (<em>int</em>) – Size of the local box (in pixels) for RMS estimation.</p></li>
+<li><p><strong>step_size</strong> (<em>int</em>) – Step between box centers (in pixels). Controls sampling density.</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – Sigma-clipping threshold (number of sigma to clip).</p></li>
+<li><p><strong>max_iters</strong> (<em>int</em>) – Maximum number of sigma-clipping iterations.</p></li>
+<li><p><strong>mask</strong> (<em>2D np.ndarray</em><em>, </em><em>optional</em>) – Boolean mask where True = ignore pixel (e.g., known sources).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>rms_map</strong> (<em>2D np.ndarray</em>) – Interpolated local RMS (noise) map.</p></li>
+<li><p><strong>mean_map</strong> (<em>2D np.ndarray</em>) – Interpolated local mean (background) map.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.generate_2d_gaussian_beam">
+<span class="sig-name descname"><span class="pre">generate_2d_gaussian_beam</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.generate_2d_gaussian_beam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.generate_2d_gaussian_beam" title="Link to this definition"></a></dt>
+<dd><p>Generate a 2D Gaussian beam for a given fits image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_beam_fwhm">
+<span class="sig-name descname"><span class="pre">get_beam_fwhm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_beam_fwhm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_beam_fwhm" title="Link to this definition"></a></dt>
+<dd><p>Get FWHM of the beam in pixels from the fits header.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_beam_size">
+<span class="sig-name descname"><span class="pre">get_beam_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_beam_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_beam_size" title="Link to this definition"></a></dt>
+<dd><p>Get sigma of the beam in pixels from the fits header.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_labelled_map">
+<span class="sig-name descname"><span class="pre">get_labelled_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_labelled_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_labelled_map" title="Link to this definition"></a></dt>
+<dd><p>Label the binary segmentation map.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_model_map">
+<span class="sig-name descname"><span class="pre">get_model_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_model_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_model_map" title="Link to this definition"></a></dt>
+<dd><p>Calculate the model map from the cleaned segmentation map and the input
+image. If use_raw is True, the raw sources are used to create the model map.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_nan_mask">
+<span class="sig-name descname"><span class="pre">get_nan_mask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_nan_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_nan_mask" title="Link to this definition"></a></dt>
+<dd><p>Get mask for nan values (MIGHTEE specific)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_raw_sources">
+<span class="sig-name descname"><span class="pre">get_raw_sources</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_raw_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_raw_sources" title="Link to this definition"></a></dt>
+<dd><p>Get the raw sources from the labelled map.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_residuals">
+<span class="sig-name descname"><span class="pre">get_residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_residuals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_residuals" title="Link to this definition"></a></dt>
+<dd><p>Calculate the residuals from the input image and the model map.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_rms_map">
+<span class="sig-name descname"><span class="pre">get_rms_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rms_box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_rms_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_rms_map" title="Link to this definition"></a></dt>
+<dd><p>Make RMS map using residual and model maps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_segmentation_map">
+<span class="sig-name descname"><span class="pre">get_segmentation_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_segmentation_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_segmentation_map" title="Link to this definition"></a></dt>
+<dd><p>Calculate the segmentation map from the reconstructed image.
+Only binary segmentation maps are currently supported.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_source_mask">
+<span class="sig-name descname"><span class="pre">get_source_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_source_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_source_mask" title="Link to this definition"></a></dt>
+<dd><p>Get the mask of the source in the cutout.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.get_sources">
+<span class="sig-name descname"><span class="pre">get_sources</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.get_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.get_sources" title="Link to this definition"></a></dt>
+<dd><p>Clean the raw sources to produce a catalogue of sources.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.pad_to_target_shape">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pad_to_target_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.pad_to_target_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.pad_to_target_shape" title="Link to this definition"></a></dt>
+<dd><p>Pad the array to match the target shape.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.sum_array">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sum_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.sum_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.sum_array" title="Link to this definition"></a></dt>
+<dd><p>Sum the array.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="continunet.image.processing.PreProcessor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">continunet.image.processing.</span></span><span class="sig-name descname"><span class="pre">PreProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PreProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PreProcessor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pre-process image data for inference.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PreProcessor.clean_nans">
+<span class="sig-name descname"><span class="pre">clean_nans</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PreProcessor.clean_nans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PreProcessor.clean_nans" title="Link to this definition"></a></dt>
+<dd><p>Check for NaNs in the image data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PreProcessor.normalise">
+<span class="sig-name descname"><span class="pre">normalise</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PreProcessor.normalise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PreProcessor.normalise" title="Link to this definition"></a></dt>
+<dd><p>Normalise the image data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PreProcessor.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PreProcessor.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PreProcessor.process" title="Link to this definition"></a></dt>
+<dd><p>Process the image data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PreProcessor.reshape">
+<span class="sig-name descname"><span class="pre">reshape</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PreProcessor.reshape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PreProcessor.reshape" title="Link to this definition"></a></dt>
+<dd><p>Reshape the image data for the network. Shape must be divisible by 2 ** n layers.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-continunet.image">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-continunet.image" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hattie Stewart.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
