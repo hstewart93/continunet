@@ -4,6 +4,7 @@
 Source finding package for radio continuum data powered by U-Net segmentation algorithm.
 
 - [Paper](https://academic.oup.com/rasti/article/3/1/315/7685538)
+- [Documentation](https://hstewart93.github.io/continunet/index.html)
 - [Installation](#installation)
 - [Developer Installation](#developer-installation)
 - [Quickstart](#quickstart)
