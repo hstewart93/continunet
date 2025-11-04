@@ -1,19 +1,13 @@
 continunet.network package
 ==========================
 
-Submodules
-----------
-
-continunet.network.unet module
+continunet.network.unet
 ------------------------------
 
 .. automodule:: continunet.network.unet
    :members:
    :show-inheritance:
    :undoc-members:
-
-Module contents
----------------
 
 .. automodule:: continunet.network
    :members:
