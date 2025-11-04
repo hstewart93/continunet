@@ -16,8 +16,3 @@ continunet.image.processing module
    :members:
    :show-inheritance:
    :undoc-members:
-
-.. automodule:: continunet.image
-   :members:
-   :show-inheritance:
-   :undoc-members:
