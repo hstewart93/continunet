@@ -35,6 +35,8 @@ ci = [
     "twine",
     "build",
     "pytest",
+    "sphinx",
+    "sphinx-rtd-theme",
 ]
 
 [tool.setuptools]

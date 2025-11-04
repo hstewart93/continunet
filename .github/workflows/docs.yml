@@ -20,8 +20,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install sphinx sphinx-rtd-theme
-          pip install -r requirements.txt
+          pip install -e .[ci]
 
       - name: Build documentation
         run: |
