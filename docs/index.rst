@@ -6,69 +6,69 @@
 ContinUNet Documentation
 ==========================
 
-Welcome to the ContinUNet documentation. This page includes installation instructions, a quickstart guide, and links to the API reference.
+Welcome to the ContinUNet documentation. ContinUNet is a source finding package for radio continuum survey data powered by U-Net segmentation algorithm. This page includes installation instructions, a quickstart guide, and links to the API reference.
 
 Installation
-------------------------------
+==========================
 
 The project is available on `PyPI <https://pypi.org/project/continunet/>`_, to install the latest stable release, use:
 
 .. code-block:: bash
 
-pip install continunet
+   pip install continunet
 
 Quickstart
-------------------------------
+==========================
 
 The package currently supports `.FITS` type images. To perform source finding, you can import the `finder` module:
 
 .. code-block:: python
 
-from continunet.finder import Finder
+   from continunet.finder import Finder
 
 Load your image file:
 
 .. code-block:: python
 
-finder = Finder("<filepath>")
+   finder = Finder("<filepath>")
 
 To produce a source catalogue and populate the `Finder` instance:
 
 .. code-block:: python
 
-sources = finder.find()
+   sources = finder.find()
 
 To calculate the model map and residuals image as part of source finding, use `Finder.find()` with `generate_maps=True`:
 
 .. code-block:: python
 
-sources = finder.find(generate_maps=True)
-model_map = finder.model_map
-residuals = finder.residuals
+   sources = finder.find(generate_maps=True)
+   model_map = finder.model_map
+   residuals = finder.residuals
 
 Alternatively, manually calculate model map and residual images using:
 
 .. code-block:: python
 
-model_map = finder.get_model_map()
-residuals = finder.get_residuals()
+   model_map = finder.get_model_map()
+   residuals = finder.get_residuals()
 
 Useful available attributes of the `Finder` object:
 
 .. code-block:: python
 
-finder.sources
-finder.reconstructed_image
-finder.segmentation_map
-finder.model_map
-finder.residuals
-finder.raw_sources
+   finder.sources
+   finder.reconstructed_image
+   finder.segmentation_map
+   finder.model_map
+   finder.residuals
+   finder.raw_sources
 
 Export the source catalogue using `finder.export_sources` as `.csv` by default, or `.FITS` by setting `export_fits=True`:
 
 .. code-block:: python
 
-finder.export_sources("<filepath>", export_fits=<Boolean>)
+   finder.export_sources("<filepath>", export_fits=<Boolean>)
 
 Source parameters extracted are:
 
@@ -119,16 +119,14 @@ Primary Interface
 .. autosummary::
 :toctree: api_summary
 
-```
-Finder
-```
+   Finder
 
-## Subpackages
+Subpackages
+------------------------------
 
 .. toctree::
 :maxdepth: 1
 
-```
-continunet.submodule1
-continunet.submodule2
-```
+
+   continunet.image
+   continunet.network

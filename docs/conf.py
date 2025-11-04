@@ -35,6 +35,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",  # supports Google & NumPy-style docstrings
     "sphinx.ext.viewcode",  # adds source links
+    "sphinx.ext.autosummary",
 ]
+autosummary_generate = True
 
 html_theme = "sphinx_rtd_theme"
