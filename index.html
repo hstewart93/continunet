@@ -42,13 +42,12 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <!-- Local TOC -->
               <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">ContinUNet Documentation</a><ul>
+<li><a class="reference internal" href="#">ContinUNet Documentation</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#quickstart">Quickstart</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#api-reference">API Reference</a><ul>
 <li><a class="reference internal" href="#module-continunet.finder">Primary Interface</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 </ul>
 </li>
 </ul>
@@ -79,60 +78,53 @@
              
   <section id="continunet-documentation">
 <h1>ContinUNet Documentation<a class="headerlink" href="#continunet-documentation" title="Link to this heading"></a></h1>
-<p>Welcome to the ContinUNet documentation. This page includes installation instructions, a quickstart guide, and links to the API reference.</p>
+<p>Welcome to the ContinUNet documentation. ContinUNet is a source finding package for radio continuum survey data powered by U-Net segmentation algorithm. This page includes installation instructions, a quickstart guide, and links to the API reference.</p>
+</section>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <p>The project is available on <a class="reference external" href="https://pypi.org/project/continunet/">PyPI</a>, to install the latest stable release, use:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>continunet
 </pre></div>
 </div>
-<p>pip install continunet</p>
 </section>
 <section id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h2>
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h1>
 <p>The package currently supports <cite>.FITS</cite> type images. To perform source finding, you can import the <cite>finder</cite> module:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">continunet.finder</span><span class="w"> </span><span class="kn">import</span> <span class="n">Finder</span>
 </pre></div>
 </div>
-<p>from continunet.finder import Finder</p>
 <p>Load your image file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span> <span class="o">=</span> <span class="n">Finder</span><span class="p">(</span><span class="s2">&quot;&lt;filepath&gt;&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>finder = Finder(“&lt;filepath&gt;”)</p>
 <p>To produce a source catalogue and populate the <cite>Finder</cite> instance:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sources</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">find</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>sources = finder.find()</p>
 <p>To calculate the model map and residuals image as part of source finding, use <cite>Finder.find()</cite> with <cite>generate_maps=True</cite>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sources</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">generate_maps</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">model_map</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">model_map</span>
+<span class="n">residuals</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">residuals</span>
 </pre></div>
 </div>
-<p>sources = finder.find(generate_maps=True)
-model_map = finder.model_map
-residuals = finder.residuals</p>
 <p>Alternatively, manually calculate model map and residual images using:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model_map</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_model_map</span><span class="p">()</span>
+<span class="n">residuals</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_residuals</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>model_map = finder.get_model_map()
-residuals = finder.get_residuals()</p>
 <p>Useful available attributes of the <cite>Finder</cite> object:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span><span class="o">.</span><span class="n">sources</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">reconstructed_image</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">segmentation_map</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">model_map</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">residuals</span>
+<span class="n">finder</span><span class="o">.</span><span class="n">raw_sources</span>
 </pre></div>
 </div>
-<p>finder.sources
-finder.reconstructed_image
-finder.segmentation_map
-finder.model_map
-finder.residuals
-finder.raw_sources</p>
 <p>Export the source catalogue using <cite>finder.export_sources</cite> as <cite>.csv</cite> by default, or <cite>.FITS</cite> by setting <cite>export_fits=True</cite>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span><span class="o">.</span><span class="n">export_sources</span><span class="p">(</span><span class="s2">&quot;&lt;filepath&gt;&quot;</span><span class="p">,</span> <span class="n">export_fits</span><span class="o">=&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>finder.export_sources(“&lt;filepath&gt;”, export_fits=&lt;Boolean&gt;)</p>
 <p>Source parameters extracted are:</p>
 <table class="docutils align-default">
 <thead>
@@ -189,32 +181,33 @@ finder.raw_sources</p>
 </tbody>
 </table>
 </section>
-</section>
 <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
 <section id="module-continunet.finder">
 <span id="primary-interface"></span><h2>Primary Interface<a class="headerlink" href="#module-continunet.finder" title="Link to this heading"></a></h2>
 <p>Compile ContinUNet modules into Finder class for source finding.</p>
-<dl class="field-list simple">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+</tbody>
+</table>
+<dl class="field-list">
 <dt class="field-odd">toctree<span class="colon">:</span></dt>
 <dd class="field-odd"><p>api_summary</p>
+<p>Finder</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">Finder</span>
-<span class="pre">`</span></code></p>
-<p>## Subpackages</p>
+</section>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 </div>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">maxdepth<span class="colon">:</span></dt>
 <dd class="field-odd"><p>1</p>
+<p>continunet.image
+continunet.network</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">continunet.submodule1</span>
-<span class="pre">continunet.submodule2</span>
-<span class="pre">`</span></code></p>
 </section>
 </section>
 
