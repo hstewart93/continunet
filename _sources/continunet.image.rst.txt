@@ -1,8 +1,5 @@
-continunet.image package
+continunet.image
 ========================
-
-Submodules
-----------
 
 continunet.image.fits module
 ----------------------------
@@ -19,9 +16,6 @@ continunet.image.processing module
    :members:
    :show-inheritance:
    :undoc-members:
-
-Module contents
----------------
 
 .. automodule:: continunet.image
    :members:

@@ -39,8 +39,14 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_summary/continunet.finder.Finder.html">continunet.finder.Finder</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../continunet.image.html">continunet.image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../continunet.network.html">continunet.network package</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -84,6 +90,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Finder</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for source finding in radio continuum images.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Finder.__init__">
+<a class="viewcode-back" href="../../api_summary/continunet.finder.Finder.html#continunet.finder.Finder.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the Finder class.</span>
 
@@ -108,7 +116,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raw_sources</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_sources</span> <span class="o">=</span> <span class="kc">None</span></div>
+
 
 <div class="viewcode-block" id="Finder.find">
 <a class="viewcode-back" href="../../continunet.html#continunet.finder.Finder.find">[docs]</a>
