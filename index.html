@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="continunet.finder.Finder" href="api_summary/continunet.finder.Finder.html" /> 
+    <link rel="next" title="Installation" href="installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,12 +41,11 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="api_summary/continunet.finder.Finder.html">continunet.finder.Finder</a></li>
-</ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="continunet.image.html">continunet.image</a></li>
-<li class="toctree-l1"><a class="reference internal" href="continunet.network.html">continunet.network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -75,138 +74,26 @@
              
   <section id="continunet-documentation">
 <h1>ContinUNet Documentation<a class="headerlink" href="#continunet-documentation" title="Link to this heading"></a></h1>
-<p>Welcome to the ContinUNet documentation. ContinUNet is a source finding package for radio continuum survey data powered by U-Net segmentation algorithm. This page includes installation instructions, a quickstart guide, and links to the API reference.</p>
-</section>
-<section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
-<p>The project is available on <a class="reference external" href="https://pypi.org/project/continunet/">PyPI</a>, to install the latest stable release, use:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>continunet
-</pre></div>
-</div>
-</section>
-<section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h1>
-<p>The package currently supports <cite>.FITS</cite> type images. To perform source finding, you can import the <cite>finder</cite> module:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">continunet.finder</span><span class="w"> </span><span class="kn">import</span> <span class="n">Finder</span>
-</pre></div>
-</div>
-<p>Load your image file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span> <span class="o">=</span> <span class="n">Finder</span><span class="p">(</span><span class="s2">&quot;&lt;filepath&gt;&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>To produce a source catalogue and populate the <cite>Finder</cite> instance:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sources</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">find</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>To calculate the model map and residuals image as part of source finding, use <cite>Finder.find()</cite> with <cite>generate_maps=True</cite>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sources</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">generate_maps</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">model_map</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">model_map</span>
-<span class="n">residuals</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">residuals</span>
-</pre></div>
-</div>
-<p>Alternatively, manually calculate model map and residual images using:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model_map</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_model_map</span><span class="p">()</span>
-<span class="n">residuals</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_residuals</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>Useful available attributes of the <cite>Finder</cite> object:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span><span class="o">.</span><span class="n">sources</span>
-<span class="n">finder</span><span class="o">.</span><span class="n">reconstructed_image</span>
-<span class="n">finder</span><span class="o">.</span><span class="n">segmentation_map</span>
-<span class="n">finder</span><span class="o">.</span><span class="n">model_map</span>
-<span class="n">finder</span><span class="o">.</span><span class="n">residuals</span>
-<span class="n">finder</span><span class="o">.</span><span class="n">raw_sources</span>
-</pre></div>
-</div>
-<p>Export the source catalogue using <cite>finder.export_sources</cite> as <cite>.csv</cite> by default, or <cite>.FITS</cite> by setting <cite>export_fits=True</cite>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span><span class="o">.</span><span class="n">export_sources</span><span class="p">(</span><span class="s2">&quot;&lt;filepath&gt;&quot;</span><span class="p">,</span> <span class="n">export_fits</span><span class="o">=&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Source parameters extracted are:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
-<th class="head"><p><strong>Description</strong></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>x_location_original</p></td>
-<td><p>x coordinate of the source from the cutout used for inference</p></td>
-</tr>
-<tr class="row-odd"><td><p>y_location_original</p></td>
-<td><p>y coordinate of the source from the cutout used for inference</p></td>
-</tr>
-<tr class="row-even"><td><p>orientation</p></td>
-<td><p>orientation of source ellipse in radians</p></td>
-</tr>
-<tr class="row-odd"><td><p>major_axis</p></td>
-<td><p>major axis of source ellipse</p></td>
-</tr>
-<tr class="row-even"><td><p>minor_axis</p></td>
-<td><p>minor axis of source ellipse</p></td>
-</tr>
-<tr class="row-odd"><td><p>flux_density_uncorrected</p></td>
-<td><p>total intensity of the segmented source region before beam corrections applied</p></td>
-</tr>
-<tr class="row-even"><td><p>label</p></td>
-<td><p>class label in predicted segmentation map</p></td>
-</tr>
-<tr class="row-odd"><td><p>x_location</p></td>
-<td><p>x coordinate of the source in the original input image dimensions</p></td>
-</tr>
-<tr class="row-even"><td><p>y_location</p></td>
-<td><p>y coordinate of the source in the original input image dimensions</p></td>
-</tr>
-<tr class="row-odd"><td><p>right_ascension</p></td>
-<td><p>RA coordinate of the source in the original input image dimensions</p></td>
-</tr>
-<tr class="row-even"><td><p>declination</p></td>
-<td><p>Dec coordinate of the source in the original input image dimensions</p></td>
-</tr>
-<tr class="row-odd"><td><p>area</p></td>
-<td><p>area of source ellipse</p></td>
-</tr>
-<tr class="row-even"><td><p>position_angle</p></td>
-<td><p>position angle of source ellipse in degrees</p></td>
-</tr>
-<tr class="row-odd"><td><p>correction_factor</p></td>
-<td><p>correction factor applied to flux density measurement to account for undersampling of synthesised beam</p></td>
-</tr>
-<tr class="row-even"><td><p>flux_density</p></td>
-<td><p>corrected flux density</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="api-reference">
-<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
-<section id="module-continunet.finder">
-<span id="primary-interface"></span><h2>Primary Interface<a class="headerlink" href="#module-continunet.finder" title="Link to this heading"></a></h2>
-<p>Compile ContinUNet modules into Finder class for source finding.</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="continunet.html#continunet.finder.Finder" title="continunet.finder.Finder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Finder</span></code></a>(image[, layers])</p></td>
-<td><p>Class for source finding in radio continuum images.</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<p>Welcome to the ContinUNet documentation. ContinUNet is a source finding package for radio continuum survey data powered by U-Net segmentation algorithm.</p>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="continunet.image.html">continunet.image</a></li>
-<li class="toctree-l1"><a class="reference internal" href="continunet.network.html">continunet.network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-continunet.finder">Primary Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 </ul>
 </div>
-</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api_summary/continunet.finder.Finder.html" class="btn btn-neutral float-right" title="continunet.finder.Finder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
