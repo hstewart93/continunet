@@ -10,7 +10,7 @@ Welcome to the ContinUNet documentation. ContinUNet is a source finding package 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    installation
    quickstart
