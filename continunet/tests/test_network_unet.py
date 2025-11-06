@@ -1,5 +1,6 @@
 """Tests for the UNet model."""
 
+import numpy as np
 import pytest
 
 from continunet.constants import TRAINED_MODEL
@@ -73,3 +74,30 @@ class TestUnet:
         )
         with pytest.raises(ValueError):
             test_model.decode_image()
+
+    @pytest.mark.parametrize("size", [512, 1024])
+    def test_large_input_shapes(self, size):
+        """
+        Test the UNet build and forward pass on larger image sizes
+        to ensure shape concatenation works (no off-by-one mismatches).
+        """
+
+        input_shape = (size, size, 1)
+        input_image = np.random.rand(1, *input_shape).astype(np.float32)
+        print(f"\n[DEBUG] Testing UNet with input shape: {input_shape}")
+
+        # Build model
+        unet = self.model(input_shape)
+        assert unet.model.input_shape == (None, *input_shape)
+
+        # Forward pass: should run without shape mismatch
+        try:
+            output = unet.model.predict(input_image, verbose=0)
+        except ValueError as e:
+            pytest.fail(f"Shape mismatch error for input {input_shape}: {e}")
+
+        # Validate output shape
+        assert output.shape == (
+            1,
+            *input_shape,
+        ), f"Output shape {output.shape} != expected {(1, *input_shape)}"

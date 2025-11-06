@@ -42,22 +42,35 @@ class PreProcessor:
 
         self.data = np.squeeze(self.data)
         self.wcs = self.wcs.celestial
-        if not isinstance(self.data.shape[0] / 2**self.layers, int) or not isinstance(
-            self.data.shape[1] / 2**self.layers, int
-        ):
-            minimum_size = self.data.shape[0] // (2**self.layers) * (2**self.layers)
+        height, width = self.data.shape[:2]
+
+        if (height % (2**self.layers)) != 0 or (width % (2**self.layers)) != 0:
+            # Compute nearest smaller size that is divisible by 2**layers
+            new_height = (height // (2**self.layers)) * (2**self.layers)
+            new_width = (width // (2**self.layers)) * (2**self.layers)
+            new_shape = (new_height, new_width)
+
             print(
                 f"{MAGENTA}Image dimensions cannot be processed by the network, "
-                f"rehsaping image from {self.data.shape} to {(minimum_size, minimum_size)}.{RESET}"
+                f"rehsaping image from {self.data.shape} to {new_shape}.{RESET}"
             )
             self.cutout_object = Cutout2D(
                 self.data,
                 (self.image.header["CRPIX1"], self.image.header["CRPIX2"]),
-                (minimum_size, minimum_size),
+                new_shape,
                 wcs=self.wcs,
             )
             self.data = self.cutout_object.data
             self.wcs = self.cutout_object.wcs
+
+        else:
+            # Image shape is already valid, create a dummy Cutout2D for propogating through
+            self.cutout_object = Cutout2D(
+                self.data,
+                (self.image.header["CRPIX1"], self.image.header["CRPIX2"]),
+                self.data.shape,
+                wcs=self.wcs,
+            )
 
         self.data = self.data.reshape(1, *self.data.shape, 1)
         return self.data
