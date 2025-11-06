@@ -73,7 +73,7 @@
   <h1>Source code for continunet.finder</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Compile ContinUNet modules into Finder class for source finding.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">importlib.resources</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span><span class="p">,</span> <span class="n">as_file</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
@@ -138,7 +138,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">pre_processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
 
         <span class="c1"># Run U-Net</span>
-        <span class="k">with</span> <span class="n">importlib</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="s2">&quot;continunet.network&quot;</span><span class="p">,</span> <span class="s2">&quot;trained_model.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">path</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">as_file</span><span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;continunet.network&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;trained_model.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">path</span><span class="p">:</span>
             <span class="n">unet</span> <span class="o">=</span> <span class="n">Unet</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">trained_model</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reconstructed_image</span> <span class="o">=</span> <span class="n">unet</span><span class="o">.</span><span class="n">decode_image</span><span class="p">()</span>
 
