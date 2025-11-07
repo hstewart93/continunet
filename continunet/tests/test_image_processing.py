@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+from continunet.image.fits import ImageSquare
 from continunet.image.processing import PreProcessor, PostProcessor
 
 
@@ -81,6 +82,24 @@ class TestPreProcessing:
         assert abs(np.median(image.data)) < 1
         assert not np.isnan(image.data).any()
         assert image.wcs.array_shape == valid_image_shape[1:3]
+
+    def test_preprocessor_rectangular_image(self, rectangular_fits_file):
+        """Ensure rectangular images are handled correctly by PreProcessor."""
+        image_obj = ImageSquare(rectangular_fits_file)
+        pre = PreProcessor(image_obj, layers=4)
+
+        data = pre.process()
+
+        assert data.ndim == 4
+        assert data.shape[0] == 1
+        assert data.shape[-1] == 1
+
+        height, width = data.shape[1:3]
+        assert height % (2**pre.layers) == 0, f"Height {height} not divisible by 2**{pre.layers}"
+        assert width % (2**pre.layers) == 0, f"Width {width} not divisible by 2**{pre.layers}"
+
+        assert pre.cutout_object is not None, "Cutout2D object not created"
+        assert pre.cutout_object.data.shape == data.shape[1:3]
 
 
 class TestPostProcessing:

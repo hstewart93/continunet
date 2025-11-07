@@ -97,6 +97,43 @@ def invalid_image_shape_fits_file(tmp_path):
 
 
 @pytest.fixture
+def rectangular_fits_file(tmp_path):
+    """Create a temporary rectangular FITS file."""
+    from astropy.io import fits
+
+    data = np.random.random((1, 512, 768))  # rectangular, not square
+    hdu = fits.PrimaryHDU(data)
+    header = fits.Header()
+
+    # minimal celestial WCS header
+    header["SIMPLE"] = True
+    header["BITPIX"] = -32
+    header["NAXIS"] = 3
+    header["NAXIS1"] = 768
+    header["NAXIS2"] = 512
+    header["NAXIS3"] = 1
+    header["BMAJ"] = 0.01
+    header["BMIN"] = 0.01
+    header["CRPIX1"] = 384
+    header["CRPIX2"] = 256
+    header["CDELT1"] = -0.0001
+    header["CDELT2"] = 0.0001
+    header["CUNIT1"] = "deg"
+    header["CUNIT2"] = "deg"
+    header["CTYPE1"] = "RA---SIN"
+    header["CTYPE2"] = "DEC--SIN"
+    header["CRVAL1"] = 0
+    header["CRVAL2"] = 0
+    header["RADESYS"] = "ICRS"
+
+    hdu.header = header
+    path = tmp_path / "rectangular.fits"
+    hdu.writeto(path, overwrite=True)
+    yield path
+    path.unlink(missing_ok=True)
+
+
+@pytest.fixture
 def fits_file_no_celestial(tmp_path):
     """Fixture for creating a temporary FITS file with no celestial information."""
     data = np.random.randint(0, 10, size=(1, 256, 256), dtype=np.uint8)

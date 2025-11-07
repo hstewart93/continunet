@@ -101,3 +101,30 @@ class TestUnet:
             1,
             *input_shape,
         ), f"Output shape {output.shape} != expected {(1, *input_shape)}"
+
+    def test_decode_image_shape_check(self):
+        """Asserts ValueError raised if invalid image shape parsed to network"""
+        unet = self.model((256, 256, 1))
+        bad_img = np.zeros((1, 257, 256, 1))
+        unet.image = bad_img
+        unet.trained_model = "dummy"
+        with pytest.raises(ValueError, match="must be divisible"):
+            unet.decode_image()
+
+    @pytest.mark.parametrize("shape", [(256, 512, 1), (512, 256, 1), (1024, 768, 1)])
+    def test_unet_accepts_non_square_images(self, shape):
+        """Ensure UNet can accept rectangular (non-square) grayscale inputs."""
+
+        image = np.random.rand(1, *shape).astype(np.float32)
+
+        test_model = self.model(shape, image=image, trained_model=TRAINED_MODEL)
+
+        decoded = test_model.decode_image()
+
+        assert decoded.shape == (
+            1,
+            *shape,
+        ), f"Expected output shape {shape}, got {decoded.shape[1:]}"
+
+        assert decoded.min() >= 0
+        assert decoded.max() <= 1

@@ -155,9 +155,14 @@ class Unet:
             raise ValueError("Image must be 4D numpy array for example (1, 256, 256, 1).")
         if self.image.shape[3] != 1:
             raise ValueError("Input image must be grayscale.")
-        if self.image.shape[0] % 2**self.layers != 0 and self.image.shape[1] % 2**self.layers != 0:
-            raise ValueError("Image shape should be divisible by 2^layers.")
-
+        if (
+            self.image.shape[1] % (2**self.layers) != 0
+            or self.image.shape[2] % (2**self.layers) != 0
+        ):
+            raise ValueError(
+                f"Image shape {self.image.shape[1:3]} must be divisible by "
+                f"2**layers={2**self.layers}."
+            )
         self.model = self.compile_model()
         self.model.load_weights(self.trained_model)
         self.reconstructed = self.model.predict(self.image)
