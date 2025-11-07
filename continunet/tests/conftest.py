@@ -99,7 +99,6 @@ def invalid_image_shape_fits_file(tmp_path):
 @pytest.fixture
 def rectangular_fits_file(tmp_path):
     """Create a temporary rectangular FITS file."""
-    from astropy.io import fits
 
     data = np.random.random((1, 512, 768))  # rectangular, not square
     hdu = fits.PrimaryHDU(data)
@@ -219,8 +218,13 @@ def valid_image_object(fits_file):
 @pytest.fixture
 def invalid_image_object(invalid_image_shape_fits_file):
     """Fixture for image object with invalid image shape."""
-    image = ImageSquare(invalid_image_shape_fits_file)
-    return image
+    return ImageSquare(invalid_image_shape_fits_file)
+
+
+@pytest.fixture
+def rectangular_image_object(rectangular_fits_file):
+    """Fixture for image object with rectangular image array."""
+    return ImageSquare(rectangular_fits_file)
 
 
 @pytest.fixture
