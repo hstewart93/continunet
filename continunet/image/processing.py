@@ -12,6 +12,7 @@ from scipy import ndimage, interpolate
 from skimage.filters import threshold_triangle, threshold_otsu
 from skimage.measure import label, regionprops_table
 from skimage.morphology import remove_small_objects
+from types import SimpleNamespace
 
 from continunet.image.fits import ImageSquare
 from continunet.constants import BLUE, CYAN, MAGENTA, RESET
@@ -65,12 +66,7 @@ class PreProcessor:
 
         else:
             # Image shape is already valid, create a dummy Cutout2D for propogating through
-            self.cutout_object = Cutout2D(
-                self.data,
-                (self.image.header["CRPIX1"], self.image.header["CRPIX2"]),
-                self.data.shape,
-                wcs=self.wcs,
-            )
+            self.cutout_object = SimpleNamespace(data=self.data, wcs=self.wcs)
 
         self.data = self.data.reshape(1, *self.data.shape, 1)
         return self.data
@@ -87,6 +83,11 @@ class PreProcessor:
         """Process the image data."""
         print(f"{CYAN}Pre-processing image...{RESET}")
         self.reshape()
+        if self.data.shape[1] % (2**self.layers) != 0 or self.data.shape[2] % (2**self.layers) != 0:
+            raise ValueError(
+                f"Final shape {self.data.shape[1:3]} not divisible by 2**layers={2**self.layers}"
+                "Possible Cutout2D pixel center issue."
+            )
         self.clean_nans()
         self.normalise()
         return self.data
