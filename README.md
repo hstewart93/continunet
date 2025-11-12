@@ -36,7 +36,7 @@ git clone git@github.com:hstewart93/continunet.git
 cd continunet
 ```
 
-Create a virtual environment for development, if you are using bash/zsh:
+Create a virtual environment for development, if you are using zsh:
 
 ```bash
 python3 -m venv venv
@@ -44,7 +44,7 @@ source venv/bin/activate
 pip install -e ".[dev,ci]"
 ```
 
-To exit the virtual environment use `deactivate`.
+For bash, run `pip install -e .[dev,ci]` instead. To exit the virtual environment use `deactivate`.
 
 This project used the black auto formatter which can be run on git commit along with flake8 if you install pre-commit. To do this run the following in your terminal from within your virtual environment.
 
