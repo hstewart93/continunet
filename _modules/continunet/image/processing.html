@@ -448,6 +448,7 @@
             <span class="s2">&quot;image_intensity&quot;</span><span class="p">,</span>
             <span class="s2">&quot;label&quot;</span><span class="p">,</span>
             <span class="s2">&quot;perimeter&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;max_intensity&quot;</span><span class="p">,</span>
         <span class="p">]</span>
 
         <span class="n">properties_table</span> <span class="o">=</span> <span class="n">regionprops_table</span><span class="p">(</span>
@@ -524,6 +525,17 @@
         <span class="k">return</span> <span class="n">fwhm_pixels</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span></div>
 
 
+<div class="viewcode-block" id="PostProcessor.get_beam_area">
+<a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.get_beam_area">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_beam_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the area of the Gaussian beam in pixels&quot;&quot;&quot;</span>
+        <span class="n">pixel_angular_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">]</span>
+        <span class="n">beam_major_axis_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMAJ&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">pixel_angular_size</span>
+        <span class="n">beam_minor_axis_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMIN&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">pixel_angular_size</span>
+
+        <span class="k">return</span> <span class="mf">1.133097</span> <span class="o">*</span> <span class="n">beam_major_axis_pixels</span> <span class="o">*</span> <span class="n">beam_minor_axis_pixels</span>  <span class="c1"># pi/(4 ln2)</span></div>
+
+
 <div class="viewcode-block" id="PostProcessor.get_source_mask">
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.get_source_mask">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_source_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted_map</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">beam_shape</span><span class="p">):</span>
@@ -568,7 +580,7 @@
         <span class="n">beam_five_sigma</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_size</span><span class="p">()</span>
         <span class="n">beam_five_sigma_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">beam_five_sigma</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">for</span> <span class="n">source_index</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">area</span> <span class="o">&gt;</span> <span class="n">beam_five_sigma_area</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">ellipse_area</span> <span class="o">&gt;</span> <span class="n">beam_five_sigma_area</span><span class="p">:</span>
                 <span class="n">correction_factor</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">source_index</span><span class="p">,</span> <span class="s2">&quot;correction_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correction_factor</span>
 
@@ -581,6 +593,98 @@
                 <span class="n">source</span><span class="o">.</span><span class="n">image_intensity</span> <span class="o">*</span> <span class="n">correction_factor</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">properties</span></div>
+
+
+<div class="viewcode-block" id="PostProcessor.calculate_flux_errors">
+<a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.calculate_flux_errors">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_flux_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute peak and integrated flux uncertainties and signal-to-noise ratios</span>
+<span class="sd">        for a single radio source using the local RMS noise map.</span>
+
+<span class="sd">        This function follows standard radio-interferometric error propagation</span>
+<span class="sd">        (e.g. Condon 1997) by estimating the noise on the peak flux from the local</span>
+<span class="sd">        map RMS, and the noise on the integrated flux from the RMS scaled by the</span>
+<span class="sd">        square root of the number of synthesized beams covered by the source.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        properties : pandas.Series</span>
+<span class="sd">            A row from the source catalogue containing:</span>
+<span class="sd">                - coords : ndarray of shape (N, 2)</span>
+<span class="sd">                    Pixel coordinates belonging to the source segmentation region.</span>
+<span class="sd">                - max_intensity : float</span>
+<span class="sd">                    Peak pixel value of the source, in Jy/beam.</span>
+<span class="sd">                - image_intensity : float</span>
+<span class="sd">                    Integrated flux of the source in Jy, after any flux conversion</span>
+<span class="sd">                    or correction performed elsewhere in the pipeline.</span>
+<span class="sd">                - source_area_pixels : int</span>
+<span class="sd">                    Number of pixels in the source region (used to compute the</span>
+<span class="sd">                    number of beams covered).</span>
+
+<span class="sd">        Assumptions</span>
+<span class="sd">        -----------</span>
+<span class="sd">        - The map intensities (`max_intensity`) and the RMS map are in units of Jy/beam.</span>
+<span class="sd">        - `image_intensity` has already been converted to a true integrated flux</span>
+<span class="sd">        density in Jy (e.g. via pixel-area/beam-area scaling and any correction</span>
+<span class="sd">        factor).</span>
+<span class="sd">        - Beam area returned by `self.get_beam_area()` is in units of image pixels.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        n_beams : float</span>
+<span class="sd">            Number of synthesized beams spanned by the source:</span>
+<span class="sd">            area_pixels / beam_area.</span>
+
+<span class="sd">        sigma_integrated : float</span>
+<span class="sd">            Uncertainty on the integrated flux density in Jy.</span>
+<span class="sd">            Computed as: local_rms * sqrt(n_beams).</span>
+
+<span class="sd">        sigma_peak : float</span>
+<span class="sd">            Uncertainty on the peak flux density in Jy/beam.</span>
+<span class="sd">            Equal to the local RMS noise.</span>
+
+<span class="sd">        snr_peak : float</span>
+<span class="sd">            Signal-to-noise ratio of the peak flux:</span>
+<span class="sd">            peak_flux / local_rms.</span>
+
+<span class="sd">        snr_integrated : float</span>
+<span class="sd">            Signal-to-noise ratio of the integrated flux:</span>
+<span class="sd">            integrated_flux / sigma_integrated.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - sigma_integrated follows the standard assumption that integrating over</span>
+<span class="sd">        N beams increases uncertainty as sqrt(N), appropriate for partially or</span>
+<span class="sd">        fully resolved sources.</span>
+<span class="sd">        - Using the median RMS within the segmentation region provides a robust</span>
+<span class="sd">        local noise estimate even in presence of small-scale variations.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span>
+        <span class="n">peak_flux</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;max_intensity&quot;</span><span class="p">]</span>  <span class="c1"># Jy/beam</span>
+        <span class="n">integrated_flux</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;image_intensity&quot;</span><span class="p">]</span>  <span class="c1"># Jy</span>
+
+        <span class="k">for</span> <span class="n">source_index</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span>
+            <span class="c1"># values from rms map at source segmentation coordinates</span>
+            <span class="n">noise_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span><span class="p">[</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span>
+
+            <span class="c1"># median value of the noise values</span>
+            <span class="n">local_rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">noise_values</span><span class="p">)</span>  <span class="c1"># Jy/beam</span>
+            <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">source_index</span><span class="p">,</span> <span class="s2">&quot;sigma_peak&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_rms</span>
+
+        <span class="c1"># number of beams covered by the source, beam_area is in pixels</span>
+        <span class="n">n_beams</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;source_area_pixels&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_area</span><span class="p">()</span>
+        <span class="c1"># computes the uncertainty on the integrated flux density of a source</span>
+        <span class="c1"># computes in quadrature for extended sources</span>
+        <span class="n">sigma_integrated</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;sigma_peak&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_beams</span><span class="p">)</span>  <span class="c1"># Jy</span>
+
+        <span class="c1"># calculate SNR for peak and integrated flux</span>
+        <span class="n">snr_peak</span> <span class="o">=</span> <span class="n">peak_flux</span> <span class="o">/</span> <span class="n">local_rms</span>
+        <span class="n">snr_integrated</span> <span class="o">=</span> <span class="n">integrated_flux</span> <span class="o">/</span> <span class="n">sigma_integrated</span>
+
+        <span class="k">return</span> <span class="n">n_beams</span><span class="p">,</span> <span class="n">sigma_integrated</span><span class="p">,</span> <span class="n">snr_peak</span><span class="p">,</span> <span class="n">snr_integrated</span></div>
 
 
 <div class="viewcode-block" id="PostProcessor.get_sources">
@@ -606,15 +710,27 @@
         <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="p">[</span><span class="n">catalogue</span><span class="o">.</span><span class="n">image_intensity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;image_intensity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;image_intensity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">area_correction_factor</span>
 
-        <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_ellipse_area</span><span class="p">(</span>
+        <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;ellipse_area&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_ellipse_area</span><span class="p">(</span>
             <span class="n">catalogue</span><span class="o">.</span><span class="n">axis_major_length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">axis_minor_length</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="p">)</span>
+
+        <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;source_area_pixels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]]</span>
 
         <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;position_angle&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_orientation_to_position_angle</span><span class="p">(</span>
             <span class="n">catalogue</span><span class="o">.</span><span class="n">orientation</span>
         <span class="p">)</span>
 
         <span class="n">catalogue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_flux_densities</span><span class="p">(</span><span class="n">catalogue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span><span class="p">)</span>
+
+        <span class="c1"># Calculate flux errors</span>
+        <span class="p">(</span>
+            <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;n_beams&quot;</span><span class="p">],</span>
+            <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;sigma_integrated&quot;</span><span class="p">],</span>
+            <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;snr_peak&quot;</span><span class="p">],</span>
+            <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;snr_integrated&quot;</span><span class="p">],</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_flux_errors</span><span class="p">(</span><span class="n">catalogue</span><span class="p">)</span>
+
+        <span class="c1"># Calculate positional errors</span>
 
         <span class="c1"># rename and drop columns</span>
         <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
@@ -625,6 +741,7 @@
                 <span class="s2">&quot;intensity_sum_corrected&quot;</span><span class="p">:</span> <span class="s2">&quot;flux_density&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;centroid-0&quot;</span><span class="p">:</span> <span class="s2">&quot;y_location_cutout&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;centroid-1&quot;</span><span class="p">:</span> <span class="s2">&quot;x_location_cutout&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;max_intensity&quot;</span><span class="p">:</span> <span class="s2">&quot;peak_flux&quot;</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
         <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">,</span> <span class="s2">&quot;perimeter&quot;</span><span class="p">])</span>
