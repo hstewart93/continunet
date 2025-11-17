@@ -338,6 +338,7 @@ class PostProcessor:
             "image_intensity",
             "label",
             "perimeter",
+            "max_intensity",
         ]
 
         properties_table = regionprops_table(
@@ -395,6 +396,14 @@ class PostProcessor:
         # convert fwhm to sigma
         return fwhm_pixels / np.sqrt(8 * np.log(2))
 
+    def get_beam_area(self):
+        """Returns the area of the Gaussian beam in pixels"""
+        pixel_angular_size = self.header["CDELT2"]
+        beam_major_axis_pixels = self.header["BMAJ"] / pixel_angular_size
+        beam_minor_axis_pixels = self.header["BMIN"] / pixel_angular_size
+
+        return 1.133097 * beam_major_axis_pixels * beam_minor_axis_pixels  # pi/(4 ln2)
+
     def get_source_mask(self, predicted_map, source, beam_shape):
         """Get the mask of the source in the cutout."""
         cutout = Cutout2D(
@@ -431,7 +440,7 @@ class PostProcessor:
         beam_five_sigma = 5 * self.get_beam_size()
         beam_five_sigma_area = np.pi * beam_five_sigma**2
         for source_index, source in properties.iterrows():
-            if source.area > beam_five_sigma_area:
+            if source.ellipse_area > beam_five_sigma_area:
                 correction_factor = 1
                 properties.at[source_index, "correction_factor"] = correction_factor
 
@@ -444,6 +453,95 @@ class PostProcessor:
                 source.image_intensity * correction_factor
             )
         return properties
+
+    def calculate_flux_errors(self, properties):
+        """
+        Compute peak and integrated flux uncertainties and signal-to-noise ratios
+        for a single radio source using the local RMS noise map.
+
+        This function follows standard radio-interferometric error propagation
+        (e.g. Condon 1997) by estimating the noise on the peak flux from the local
+        map RMS, and the noise on the integrated flux from the RMS scaled by the
+        square root of the number of synthesized beams covered by the source.
+
+        Parameters
+        ----------
+        properties : pandas.Series
+            A row from the source catalogue containing:
+                - coords : ndarray of shape (N, 2)
+                    Pixel coordinates belonging to the source segmentation region.
+                - max_intensity : float
+                    Peak pixel value of the source, in Jy/beam.
+                - image_intensity : float
+                    Integrated flux of the source in Jy, after any flux conversion
+                    or correction performed elsewhere in the pipeline.
+                - source_area_pixels : int
+                    Number of pixels in the source region (used to compute the
+                    number of beams covered).
+
+        Assumptions
+        -----------
+        - The map intensities (`max_intensity`) and the RMS map are in units of Jy/beam.
+        - `image_intensity` has already been converted to a true integrated flux
+        density in Jy (e.g. via pixel-area/beam-area scaling and any correction
+        factor).
+        - Beam area returned by `self.get_beam_area()` is in units of image pixels.
+
+        Returns
+        -------
+        n_beams : float
+            Number of synthesized beams spanned by the source:
+            area_pixels / beam_area.
+
+        sigma_integrated : float
+            Uncertainty on the integrated flux density in Jy.
+            Computed as: local_rms * sqrt(n_beams).
+
+        sigma_peak : float
+            Uncertainty on the peak flux density in Jy/beam.
+            Equal to the local RMS noise.
+
+        snr_peak : float
+            Signal-to-noise ratio of the peak flux:
+            peak_flux / local_rms.
+
+        snr_integrated : float
+            Signal-to-noise ratio of the integrated flux:
+            integrated_flux / sigma_integrated.
+
+        Notes
+        -----
+        - sigma_integrated follows the standard assumption that integrating over
+        N beams increases uncertainty as sqrt(N), appropriate for partially or
+        fully resolved sources.
+        - Using the median RMS within the segmentation region provides a robust
+        local noise estimate even in presence of small-scale variations.
+
+        """
+        coords = properties["coords"]
+        peak_flux = properties["max_intensity"]  # Jy/beam
+        integrated_flux = properties["image_intensity"]  # Jy
+
+        for source_index, source in properties.iterrows():
+            coords = source["coords"]
+            # values from rms map at source segmentation coordinates
+            noise_values = self.rms_map[coords[:, 0], coords[:, 1]]
+
+            # median value of the noise values
+            local_rms = np.median(noise_values)  # Jy/beam
+            properties.at[source_index, "sigma_peak"] = local_rms
+
+        # number of beams covered by the source, beam_area is in pixels
+        n_beams = properties["source_area_pixels"] / self.get_beam_area()
+        # computes the uncertainty on the integrated flux density of a source
+        # computes in quadrature for extended sources
+        sigma_integrated = properties["sigma_peak"] * np.sqrt(n_beams)  # Jy
+
+        # calculate SNR for peak and integrated flux
+        snr_peak = peak_flux / local_rms
+        snr_integrated = integrated_flux / sigma_integrated
+
+        return n_beams, sigma_integrated, snr_peak, snr_integrated
 
     def get_sources(self):
         """Clean the raw sources to produce a catalogue of sources."""
@@ -466,15 +564,27 @@ class PostProcessor:
         catalogue = catalogue[catalogue.image_intensity > 0]
         catalogue["image_intensity"] = catalogue["image_intensity"] * area_correction_factor
 
-        catalogue["area"] = self.calculate_ellipse_area(
+        catalogue["ellipse_area"] = self.calculate_ellipse_area(
             catalogue.axis_major_length / 2, catalogue.axis_minor_length / 2
         )
+
+        catalogue["source_area_pixels"] = [len(coords) for coords in catalogue["coords"]]
 
         catalogue["position_angle"] = self.convert_orientation_to_position_angle(
             catalogue.orientation
         )
 
         catalogue = self.correct_flux_densities(catalogue, self.segmentation_map)
+
+        # Calculate flux errors
+        (
+            catalogue["n_beams"],
+            catalogue["sigma_integrated"],
+            catalogue["snr_peak"],
+            catalogue["snr_integrated"],
+        ) = self.calculate_flux_errors(catalogue)
+
+        # Calculate positional errors
 
         # rename and drop columns
         catalogue = catalogue.rename(
@@ -485,6 +595,7 @@ class PostProcessor:
                 "intensity_sum_corrected": "flux_density",
                 "centroid-0": "y_location_cutout",
                 "centroid-1": "x_location_cutout",
+                "max_intensity": "peak_flux",
             },
         )
         catalogue = catalogue.drop(columns=["coords", "perimeter"])
