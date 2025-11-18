@@ -84,7 +84,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndimage</span><span class="p">,</span> <span class="n">interpolate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skimage.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">threshold_triangle</span><span class="p">,</span> <span class="n">threshold_otsu</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skimage.measure</span><span class="w"> </span><span class="kn">import</span> <span class="n">label</span><span class="p">,</span> <span class="n">regionprops_table</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.morphology</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_small_objects</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.morphology</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_small_objects</span><span class="p">,</span> <span class="n">remove_small_holes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleNamespace</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">continunet.image.fits</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImageSquare</span>
@@ -407,10 +407,19 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_maps</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CYAN</span><span class="si">}</span><span class="s2">Removing objects smaller than beam FWHM...</span><span class="si">{</span><span class="n">RESET</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># remove objects smaller than the beam FWHM</span>
-            <span class="n">min_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_fwhm</span><span class="p">()</span>
+
+            <span class="n">beam_area_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_area</span><span class="p">()</span>
+
+            <span class="c1"># remove objects smaller than the beam area</span>
+            <span class="n">min_pixels_objects</span> <span class="o">=</span> <span class="n">beam_area_pixels</span>
+            <span class="c1"># fill holes smaller than 0.5 beam area, to preserve morphology</span>
+            <span class="n">min_pixels_holes</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">beam_area_pixels</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span> <span class="o">=</span> <span class="n">remove_small_objects</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="n">min_pixels</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="n">min_pixels_objects</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span> <span class="o">=</span> <span class="n">remove_small_holes</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span><span class="p">,</span> <span class="n">area_threshold</span><span class="o">=</span><span class="n">min_pixels_holes</span>
             <span class="p">)</span>
 
             <span class="c1"># get rms map</span>
