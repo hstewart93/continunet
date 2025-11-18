@@ -454,7 +454,7 @@ class PostProcessor:
             )
         return properties
 
-    def calculate_flux_errors(self, properties):
+    def calculate_flux_errors(self, properties, correction_factor):
         """
         Compute peak and integrated flux uncertainties and signal-to-noise ratios
         for a single radio source using the local RMS noise map.
@@ -518,7 +518,6 @@ class PostProcessor:
         local noise estimate even in presence of small-scale variations.
 
         """
-        coords = properties["coords"]
         peak_flux = properties["max_intensity"]  # Jy/beam
         integrated_flux = properties["image_intensity"]  # Jy
 
@@ -535,7 +534,10 @@ class PostProcessor:
         n_beams = properties["source_area_pixels"] / self.get_beam_area()
         # computes the uncertainty on the integrated flux density of a source
         # computes in quadrature for extended sources
-        sigma_integrated = properties["sigma_peak"] * np.sqrt(n_beams)  # Jy
+        sigma_integrated = properties["sigma_peak"] * np.sqrt(n_beams)  # Jy/beam
+
+        # Convert integrated flux error to Jy
+        sigma_integrated = sigma_integrated * correction_factor  # Jy
 
         # calculate SNR for peak and integrated flux
         snr_peak = peak_flux / local_rms
@@ -579,12 +581,10 @@ class PostProcessor:
         # Calculate flux errors
         (
             catalogue["n_beams"],
-            catalogue["sigma_integrated"],
+            catalogue["flux_density_error"],
             catalogue["snr_peak"],
             catalogue["snr_integrated"],
-        ) = self.calculate_flux_errors(catalogue)
-
-        # Calculate positional errors
+        ) = self.calculate_flux_errors(catalogue, area_correction_factor)
 
         # rename and drop columns
         catalogue = catalogue.rename(
@@ -596,6 +596,7 @@ class PostProcessor:
                 "centroid-0": "y_location_cutout",
                 "centroid-1": "x_location_cutout",
                 "max_intensity": "peak_flux",
+                "sigma_peak": "peak_flux_error",
             },
         )
         catalogue = catalogue.drop(columns=["coords", "perimeter"])
