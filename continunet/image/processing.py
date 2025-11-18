@@ -11,7 +11,7 @@ from astropy.nddata import Cutout2D
 from scipy import ndimage, interpolate
 from skimage.filters import threshold_triangle, threshold_otsu
 from skimage.measure import label, regionprops_table
-from skimage.morphology import remove_small_objects
+from skimage.morphology import remove_small_objects, remove_small_holes
 from types import SimpleNamespace
 
 from continunet.image.fits import ImageSquare
@@ -303,10 +303,19 @@ class PostProcessor:
 
         if self.clean_maps:
             print(f"{CYAN}Removing objects smaller than beam FWHM...{RESET}")
-            # remove objects smaller than the beam FWHM
-            min_pixels = self.get_beam_fwhm()
+
+            beam_area_pixels = self.get_beam_area()
+
+            # remove objects smaller than the beam area
+            min_pixels_objects = beam_area_pixels
+            # fill holes smaller than 0.5 beam area, to preserve morphology
+            min_pixels_holes = 0.5 * beam_area_pixels
+
             self.segmentation_map = remove_small_objects(
-                self.segmentation_map.astype(bool), min_size=min_pixels
+                self.segmentation_map.astype(bool), min_size=min_pixels_objects
+            )
+            self.segmentation_map = remove_small_holes(
+                self.segmentation_map, area_threshold=min_pixels_holes
             )
 
             # get rms map
