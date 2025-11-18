@@ -680,7 +680,7 @@
         <span class="n">sigma_integrated</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;sigma_peak&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_beams</span><span class="p">)</span>  <span class="c1"># Jy/beam</span>
 
         <span class="c1"># Convert integrated flux error to Jy</span>
-        <span class="n">sigma_integrated</span> <span class="o">=</span> <span class="n">sigma_integrated</span> <span class="o">*</span> <span class="n">correction_factor</span>  <span class="c1"># Jy</span>
+        <span class="c1"># sigma_integrated = sigma_integrated * correction_factor  # Jy</span>
 
         <span class="c1"># calculate SNR for peak and integrated flux</span>
         <span class="n">snr_peak</span> <span class="o">=</span> <span class="n">peak_flux</span> <span class="o">/</span> <span class="n">local_rms</span>
