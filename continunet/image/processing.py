@@ -537,7 +537,7 @@ class PostProcessor:
         sigma_integrated = properties["sigma_peak"] * np.sqrt(n_beams)  # Jy/beam
 
         # Convert integrated flux error to Jy
-        sigma_integrated = sigma_integrated * correction_factor  # Jy
+        # sigma_integrated = sigma_integrated * correction_factor  # Jy
 
         # calculate SNR for peak and integrated flux
         snr_peak = peak_flux / local_rms
