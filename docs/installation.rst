@@ -7,3 +7,5 @@ The project is available on `PyPI <https://pypi.org/project/continunet/>`_, to i
 .. code-block:: bash
 
    pip install continunet
+
+ContinUNet requires `>=Python3.9, <Python3.12`

@@ -24,7 +24,7 @@ To install version in development, use:
 pip install git+https://github.com/hstewart93/continunet
 ```
 
-**ContinUNet has a `Python 3.9` minimum requirement.**
+**ContinUNet requires `>=Python3.9, <Python3.12`.**
 
 ## Developer Setup
 If you want to setup a developer environment, install as follows:
