@@ -597,7 +597,7 @@
 
 <div class="viewcode-block" id="PostProcessor.calculate_flux_errors">
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.calculate_flux_errors">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_flux_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_flux_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">correction_factor</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute peak and integrated flux uncertainties and signal-to-noise ratios</span>
 <span class="sd">        for a single radio source using the local RMS noise map.</span>
@@ -661,7 +661,6 @@
 <span class="sd">        local noise estimate even in presence of small-scale variations.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span>
         <span class="n">peak_flux</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;max_intensity&quot;</span><span class="p">]</span>  <span class="c1"># Jy/beam</span>
         <span class="n">integrated_flux</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;image_intensity&quot;</span><span class="p">]</span>  <span class="c1"># Jy</span>
 
@@ -678,7 +677,10 @@
         <span class="n">n_beams</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;source_area_pixels&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_area</span><span class="p">()</span>
         <span class="c1"># computes the uncertainty on the integrated flux density of a source</span>
         <span class="c1"># computes in quadrature for extended sources</span>
-        <span class="n">sigma_integrated</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;sigma_peak&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_beams</span><span class="p">)</span>  <span class="c1"># Jy</span>
+        <span class="n">sigma_integrated</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;sigma_peak&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_beams</span><span class="p">)</span>  <span class="c1"># Jy/beam</span>
+
+        <span class="c1"># Convert integrated flux error to Jy</span>
+        <span class="n">sigma_integrated</span> <span class="o">=</span> <span class="n">sigma_integrated</span> <span class="o">*</span> <span class="n">correction_factor</span>  <span class="c1"># Jy</span>
 
         <span class="c1"># calculate SNR for peak and integrated flux</span>
         <span class="n">snr_peak</span> <span class="o">=</span> <span class="n">peak_flux</span> <span class="o">/</span> <span class="n">local_rms</span>
@@ -725,12 +727,10 @@
         <span class="c1"># Calculate flux errors</span>
         <span class="p">(</span>
             <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;n_beams&quot;</span><span class="p">],</span>
-            <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;sigma_integrated&quot;</span><span class="p">],</span>
+            <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;flux_density_error&quot;</span><span class="p">],</span>
             <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;snr_peak&quot;</span><span class="p">],</span>
             <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;snr_integrated&quot;</span><span class="p">],</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_flux_errors</span><span class="p">(</span><span class="n">catalogue</span><span class="p">)</span>
-
-        <span class="c1"># Calculate positional errors</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_flux_errors</span><span class="p">(</span><span class="n">catalogue</span><span class="p">,</span> <span class="n">area_correction_factor</span><span class="p">)</span>
 
         <span class="c1"># rename and drop columns</span>
         <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
@@ -742,6 +742,7 @@
                 <span class="s2">&quot;centroid-0&quot;</span><span class="p">:</span> <span class="s2">&quot;y_location_cutout&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;centroid-1&quot;</span><span class="p">:</span> <span class="s2">&quot;x_location_cutout&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;max_intensity&quot;</span><span class="p">:</span> <span class="s2">&quot;peak_flux&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sigma_peak&quot;</span><span class="p">:</span> <span class="s2">&quot;peak_flux_error&quot;</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
         <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">,</span> <span class="s2">&quot;perimeter&quot;</span><span class="p">])</span>
