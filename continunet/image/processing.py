@@ -268,13 +268,8 @@ class PostProcessor:
         print(f"{CYAN}Creating RMS map...{RESET}")
         if rms_box == "default":
             rms_box = math.floor(self.get_beam_fwhm()) * 10
-        rms_map, _ = self.estimate_noise_map(raw_residuals, box_size=rms_box)
-        self.get_nan_mask()
-        self.rms_map = np.where(
-            self.nan_mask == 0,
-            np.nan,
-            rms_map,
-        )
+        self.rms_map, _ = self.estimate_noise_map(raw_residuals, box_size=rms_box)
+
         return raw_model_map, raw_residuals, self.rms_map
 
     def get_segmentation_map(self):
@@ -635,6 +630,15 @@ class PostProcessor:
 
     def replace_map_nans(self):
         """MIGHTEE specific method to replace nan values in all maps."""
+        self.get_nan_mask()
+        if self.rms_map is not None:
+            self.rms_map = np.where(
+                self.nan_mask == 0,
+                np.nan,
+                self.rms_map,
+            )
+        else:
+            print("RMS Map is empty, consider calling 'get_rms_map'")
         if self.model_map is not None:
             self.model_map = np.where(
                 self.nan_mask == 0,
