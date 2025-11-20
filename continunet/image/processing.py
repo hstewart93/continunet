@@ -632,3 +632,35 @@ class PostProcessor:
             self.get_model_map(use_raw)
         self.residuals = self.cutout_object.data - self.model_map
         return self.residuals
+
+    def replace_map_nans(self):
+        """MIGHTEE specific method to replace nan values in all maps."""
+        if self.model_map:
+            self.model_map = np.where(
+                self.nan_mask == 0,
+                np.nan,
+                self.model_map,
+            )
+
+        else:
+            print("Model map is empty, consider calling 'get_model_map'")
+
+        if self.segmentation_map:
+            self.segmentation_map = np.where(
+                self.nan_mask == 0,
+                np.nan,
+                self.segmentation_map,
+            )
+        else:
+            print("Segmentation map is empty, consider calling 'get_raw_sources'")
+
+        if self.residuals:
+            self.residuals = np.where(
+                self.nan_mask == 0,
+                np.nan,
+                self.residuals,
+            )
+        else:
+            print("Residuals is empty, consider calling 'get_residuals'")
+
+        return self
