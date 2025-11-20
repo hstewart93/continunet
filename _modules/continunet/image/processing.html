@@ -784,6 +784,41 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">get_model_map</span><span class="p">(</span><span class="n">use_raw</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutout_object</span><span class="o">.</span><span class="n">data</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span></div>
+
+
+<div class="viewcode-block" id="PostProcessor.replace_map_nans">
+<a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.replace_map_nans">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">replace_map_nans</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MIGHTEE specific method to replace nan values in all maps.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model map is empty, consider calling &#39;get_model_map&#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">segmentation_map</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Segmentation map is empty, consider calling &#39;get_raw_sources&#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Residuals is empty, consider calling &#39;get_residuals&#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
 </div>
 
 </pre></div>
