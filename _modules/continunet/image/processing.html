@@ -369,13 +369,8 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CYAN</span><span class="si">}</span><span class="s2">Creating RMS map...</span><span class="si">{</span><span class="n">RESET</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rms_box</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
             <span class="n">rms_box</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_beam_fwhm</span><span class="p">())</span> <span class="o">*</span> <span class="mi">10</span>
-        <span class="n">rms_map</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise_map</span><span class="p">(</span><span class="n">raw_residuals</span><span class="p">,</span> <span class="n">box_size</span><span class="o">=</span><span class="n">rms_box</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_nan_mask</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-            <span class="n">rms_map</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise_map</span><span class="p">(</span><span class="n">raw_residuals</span><span class="p">,</span> <span class="n">box_size</span><span class="o">=</span><span class="n">rms_box</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">raw_model_map</span><span class="p">,</span> <span class="n">raw_residuals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span></div>
 
 
@@ -790,6 +785,15 @@
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.replace_map_nans">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">replace_map_nans</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;MIGHTEE specific method to replace nan values in all maps.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_nan_mask</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RMS Map is empty, consider calling &#39;get_rms_map&#39;&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
