@@ -9,6 +9,7 @@ from astropy.stats import sigma_clip
 from astropy.modeling.functional_models import Gaussian2D
 from astropy.nddata import Cutout2D
 from scipy import ndimage, interpolate
+from scipy.ndimage import uniform_filter
 from skimage.filters import threshold_triangle, threshold_otsu
 from skimage.measure import label, regionprops_table
 from skimage.morphology import remove_small_objects, remove_small_holes
@@ -106,20 +107,54 @@ class PostProcessor:
         rms_box,
         clean_maps,
     ):
-        """Initialise the PostProcessor class.
+        """
+        Initialise the PostProcessor class.
 
         Parameters
         ----------
         reconstructed_image : np.ndarray
-            The reconstructed image from the neural network.
-            Must be a numpy array.
+            The reconstructed (model-output) image produced by the neural network.
+            Must be a 2D NumPy array.
         pre_processed_image : object
-            The pre-processed image object. Must be a PreProcessor object.
-        threshold : str
-            The thresholding method to use for the segmentation map.
-            Default is "default" which uses the scikit-image triangle threshold.
-            To use a custom threshold, provide a float value.
+            The pre-processed image object used earlier in the pipeline.
+            Must be an instance of ``PreProcessor``.
+        threshold : str or float
+            The thresholding method used to generate the segmentation map.
+            If ``"default"``, the scikit-image triangle threshold is used.
+            If a float is supplied, it is interpreted as a fixed absolute threshold
+            (in image units).
+        sigma_snr : float
+            The minimum signal-to-noise ratio required for source detection.
+            Typically used when filtering segmented detections against the RMS map.
+        rms_box : {"default", tuple}
+            Controls how the RMS (noise) map is estimated.
+
+            - If ``"default"``, the RMS box size is automatically chosen as
+            ``10 × beam_FWHM`` (rounded down), and the noise map is computed using
+            default settings of the noise estimator.
+
+            - If a tuple is provided, it must be of the form
+            ``(box_size, sigma, max_iters)`` and is passed directly to
+            ``estimate_noise_map`` as:
+
+            ``estimate_noise_map(raw_residuals, box_size, sigma, max_iters)``
+
+            This allows customised control over the spatial scale of noise
+            estimation, sigma-clipping strength, and iteration count.
+        clean_maps : bool
+            Whether to apply additional cleaning steps to the reconstructed image
+            and derived maps (e.g., morphological cleaning, hole filling, small-blob
+            removal). If ``True``, extra post-processing steps are applied prior to
+            source extraction.
+
+        Notes
+        -----
+        This class handles all post-inference processing needed to convert neural
+        network outputs into an astrophysical segmentation map and final source
+        catalogue. This includes noise estimation, thresholding, mask generation,
+        object filtering, and assembly of catalogue properties.
         """
+
         if reconstructed_image is None:
             raise ValueError("Reconstructed image must be provided.")
         if not isinstance(reconstructed_image, np.ndarray):
@@ -161,6 +196,68 @@ class PostProcessor:
         self.nan_mask = np.where(nan_image != 0, 1, nan_mask)
 
         return self.nan_mask
+
+    def fast_noise_map(self, image, box_size=100, sigma=3, max_iters=3):
+        """
+        Compute a fast, approximate spatially varying noise (RMS) and mean map
+        using boxcar smoothing and optional iterative sigma-clipping.
+
+        This method provides a significantly faster alternative to full
+        box-based noise estimation (e.g., PyBDSF-style tiling) by using
+        uniform filters to compute local statistics over the entire image
+        in one pass. The result is a smoothly varying estimate of the
+        background mean and RMS.
+
+        Parameters
+        ----------
+        image : 2D np.ndarray
+            Input image from which to estimate local noise. Will be cast
+            to float32 internally.
+        box_size : int, optional
+            Size of the box (in pixels) used by the uniform filter when
+            computing local means and variances. Larger values result in
+            smoother noise/mean maps.
+        sigma : float, optional
+            Sigma threshold for optional iterative sigma-clipping. Pixels
+            deviating more than ``sigma * rms`` from the local mean are
+            replaced with the mean before recomputing statistics.
+        max_iters : int, optional
+            Number of sigma-clipping iterations to perform. Set to zero
+            to disable clipping entirely.
+
+        Returns
+        -------
+        rms : 2D np.ndarray
+            Estimated spatially varying RMS (noise) map.
+        mean : 2D np.ndarray
+            Estimated spatially varying mean (background) map.
+
+        Notes
+        -----
+        - This method assumes noise varies slowly on scales larger than
+        ``box_size``.
+        - Sigma-clipping helps suppress bright sources but is approximate:
+        clipping modifies the image iteratively rather than evaluating
+        statistics in independent tiles.
+        - This approach is best suited for applications where speed is
+        more important than strict robustness to complex source structure.
+        """
+
+        image = image.astype(np.float32)
+        mean = uniform_filter(image, box_size)
+        mean_sq = uniform_filter(image * image, box_size)
+        rms = np.sqrt(np.maximum(mean_sq - mean**2, 0))
+
+        # optional iterative sigma clipping
+        for _ in range(max_iters):
+            resid = image - mean
+            mask = np.abs(resid) > sigma * rms
+            image_2 = image.copy()
+            image_2[mask] = mean[mask]  # replace outliers
+            mean = uniform_filter(image_2, box_size)
+            rms = np.sqrt(uniform_filter(image_2 * image_2, box_size) - mean**2)
+
+        return rms, mean
 
     def estimate_noise_map(
         self, image, box_size=100, step_size=30, sigma=3.0, max_iters=5, mask=None
@@ -268,7 +365,16 @@ class PostProcessor:
         print(f"{CYAN}Creating RMS map...{RESET}")
         if rms_box == "default":
             rms_box = math.floor(self.get_beam_fwhm()) * 10
-        self.rms_map, _ = self.estimate_noise_map(raw_residuals, box_size=rms_box)
+            self.rms_map, _ = self.estimate_noise_map(raw_residuals, box_size=rms_box)
+            return raw_model_map, raw_residuals, self.rms_map
+
+        self.rms_map, _ = self.estimate_noise_map(
+            raw_residuals,
+            box_size=rms_box[0],
+            sigma=rms_box[1],
+            max_iters=rms_box[2],
+        )
+        # self.rms_map, _ = self.fast_noise_map(raw_residuals, box_size=rms_box)
 
         return raw_model_map, raw_residuals, self.rms_map
 
@@ -599,9 +705,10 @@ class PostProcessor:
                 "centroid-1": "x_location_cutout",
                 "max_intensity": "peak_flux",
                 "sigma_peak": "peak_flux_error",
+                "coords": "segmentation_pixel_coords",
             },
         )
-        catalogue = catalogue.drop(columns=["coords", "perimeter"])
+        catalogue = catalogue.drop(columns=["perimeter"])
         self.sources = catalogue
         return self.sources
 
