@@ -248,6 +248,51 @@ for undersampling the synthesized beam.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.fast_noise_map">
+<span class="sig-name descname"><span class="pre">fast_noise_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.fast_noise_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.fast_noise_map" title="Link to this definition"></a></dt>
+<dd><p>Compute a fast, approximate spatially varying noise (RMS) and mean map
+using boxcar smoothing and optional iterative sigma-clipping.</p>
+<p>This method provides a significantly faster alternative to full
+box-based noise estimation (e.g., PyBDSF-style tiling) by using
+uniform filters to compute local statistics over the entire image
+in one pass. The result is a smoothly varying estimate of the
+background mean and RMS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>2D np.ndarray</em>) – Input image from which to estimate local noise. Will be cast
+to float32 internally.</p></li>
+<li><p><strong>box_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of the box (in pixels) used by the uniform filter when
+computing local means and variances. Larger values result in
+smoother noise/mean maps.</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Sigma threshold for optional iterative sigma-clipping. Pixels
+deviating more than <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">*</span> <span class="pre">rms</span></code> from the local mean are
+replaced with the mean before recomputing statistics.</p></li>
+<li><p><strong>max_iters</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of sigma-clipping iterations to perform. Set to zero
+to disable clipping entirely.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>rms</strong> (<em>2D np.ndarray</em>) – Estimated spatially varying RMS (noise) map.</p></li>
+<li><p><strong>mean</strong> (<em>2D np.ndarray</em>) – Estimated spatially varying mean (background) map.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This method assumes noise varies slowly on scales larger than</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">box_size</span></code>.
+- Sigma-clipping helps suppress bright sources but is approximate:
+clipping modifies the image iteratively rather than evaluating
+statistics in independent tiles.
+- This approach is best suited for applications where speed is
+more important than strict robustness to complex source structure.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="continunet.image.processing.PostProcessor.generate_2d_gaussian_beam">
 <span class="sig-name descname"><span class="pre">generate_2d_gaussian_beam</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/continunet/image/processing.html#PostProcessor.generate_2d_gaussian_beam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#continunet.image.processing.PostProcessor.generate_2d_gaussian_beam" title="Link to this definition"></a></dt>
 <dd><p>Generate a 2D Gaussian beam for a given fits image.</p>

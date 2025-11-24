@@ -82,6 +82,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.modeling.functional_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2D</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.nddata</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cutout2D</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndimage</span><span class="p">,</span> <span class="n">interpolate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">uniform_filter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skimage.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">threshold_triangle</span><span class="p">,</span> <span class="n">threshold_otsu</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skimage.measure</span><span class="w"> </span><span class="kn">import</span> <span class="n">label</span><span class="p">,</span> <span class="n">regionprops_table</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">skimage.morphology</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_small_objects</span><span class="p">,</span> <span class="n">remove_small_holes</span>
@@ -196,20 +197,54 @@
         <span class="n">rms_box</span><span class="p">,</span>
         <span class="n">clean_maps</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the PostProcessor class.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the PostProcessor class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        reconstructed_image : np.ndarray</span>
-<span class="sd">            The reconstructed image from the neural network.</span>
-<span class="sd">            Must be a numpy array.</span>
+<span class="sd">            The reconstructed (model-output) image produced by the neural network.</span>
+<span class="sd">            Must be a 2D NumPy array.</span>
 <span class="sd">        pre_processed_image : object</span>
-<span class="sd">            The pre-processed image object. Must be a PreProcessor object.</span>
-<span class="sd">        threshold : str</span>
-<span class="sd">            The thresholding method to use for the segmentation map.</span>
-<span class="sd">            Default is &quot;default&quot; which uses the scikit-image triangle threshold.</span>
-<span class="sd">            To use a custom threshold, provide a float value.</span>
+<span class="sd">            The pre-processed image object used earlier in the pipeline.</span>
+<span class="sd">            Must be an instance of ``PreProcessor``.</span>
+<span class="sd">        threshold : str or float</span>
+<span class="sd">            The thresholding method used to generate the segmentation map.</span>
+<span class="sd">            If ``&quot;default&quot;``, the scikit-image triangle threshold is used.</span>
+<span class="sd">            If a float is supplied, it is interpreted as a fixed absolute threshold</span>
+<span class="sd">            (in image units).</span>
+<span class="sd">        sigma_snr : float</span>
+<span class="sd">            The minimum signal-to-noise ratio required for source detection.</span>
+<span class="sd">            Typically used when filtering segmented detections against the RMS map.</span>
+<span class="sd">        rms_box : {&quot;default&quot;, tuple}</span>
+<span class="sd">            Controls how the RMS (noise) map is estimated.</span>
+
+<span class="sd">            - If ``&quot;default&quot;``, the RMS box size is automatically chosen as</span>
+<span class="sd">            ``10 × beam_FWHM`` (rounded down), and the noise map is computed using</span>
+<span class="sd">            default settings of the noise estimator.</span>
+
+<span class="sd">            - If a tuple is provided, it must be of the form</span>
+<span class="sd">            ``(box_size, sigma, max_iters)`` and is passed directly to</span>
+<span class="sd">            ``estimate_noise_map`` as:</span>
+
+<span class="sd">            ``estimate_noise_map(raw_residuals, box_size, sigma, max_iters)``</span>
+
+<span class="sd">            This allows customised control over the spatial scale of noise</span>
+<span class="sd">            estimation, sigma-clipping strength, and iteration count.</span>
+<span class="sd">        clean_maps : bool</span>
+<span class="sd">            Whether to apply additional cleaning steps to the reconstructed image</span>
+<span class="sd">            and derived maps (e.g., morphological cleaning, hole filling, small-blob</span>
+<span class="sd">            removal). If ``True``, extra post-processing steps are applied prior to</span>
+<span class="sd">            source extraction.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This class handles all post-inference processing needed to convert neural</span>
+<span class="sd">        network outputs into an astrophysical segmentation map and final source</span>
+<span class="sd">        catalogue. This includes noise estimation, thresholding, mask generation,</span>
+<span class="sd">        object filtering, and assembly of catalogue properties.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">reconstructed_image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Reconstructed image must be provided.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reconstructed_image</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -256,6 +291,71 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">nan_image</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nan_mask</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nan_mask</span></div>
+
+
+<div class="viewcode-block" id="PostProcessor.fast_noise_map">
+<a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.fast_noise_map">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fast_noise_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">box_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_iters</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute a fast, approximate spatially varying noise (RMS) and mean map</span>
+<span class="sd">        using boxcar smoothing and optional iterative sigma-clipping.</span>
+
+<span class="sd">        This method provides a significantly faster alternative to full</span>
+<span class="sd">        box-based noise estimation (e.g., PyBDSF-style tiling) by using</span>
+<span class="sd">        uniform filters to compute local statistics over the entire image</span>
+<span class="sd">        in one pass. The result is a smoothly varying estimate of the</span>
+<span class="sd">        background mean and RMS.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        image : 2D np.ndarray</span>
+<span class="sd">            Input image from which to estimate local noise. Will be cast</span>
+<span class="sd">            to float32 internally.</span>
+<span class="sd">        box_size : int, optional</span>
+<span class="sd">            Size of the box (in pixels) used by the uniform filter when</span>
+<span class="sd">            computing local means and variances. Larger values result in</span>
+<span class="sd">            smoother noise/mean maps.</span>
+<span class="sd">        sigma : float, optional</span>
+<span class="sd">            Sigma threshold for optional iterative sigma-clipping. Pixels</span>
+<span class="sd">            deviating more than ``sigma * rms`` from the local mean are</span>
+<span class="sd">            replaced with the mean before recomputing statistics.</span>
+<span class="sd">        max_iters : int, optional</span>
+<span class="sd">            Number of sigma-clipping iterations to perform. Set to zero</span>
+<span class="sd">            to disable clipping entirely.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rms : 2D np.ndarray</span>
+<span class="sd">            Estimated spatially varying RMS (noise) map.</span>
+<span class="sd">        mean : 2D np.ndarray</span>
+<span class="sd">            Estimated spatially varying mean (background) map.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - This method assumes noise varies slowly on scales larger than</span>
+<span class="sd">        ``box_size``.</span>
+<span class="sd">        - Sigma-clipping helps suppress bright sources but is approximate:</span>
+<span class="sd">        clipping modifies the image iteratively rather than evaluating</span>
+<span class="sd">        statistics in independent tiles.</span>
+<span class="sd">        - This approach is best suited for applications where speed is</span>
+<span class="sd">        more important than strict robustness to complex source structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">uniform_filter</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span>
+        <span class="n">mean_sq</span> <span class="o">=</span> <span class="n">uniform_filter</span><span class="p">(</span><span class="n">image</span> <span class="o">*</span> <span class="n">image</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span>
+        <span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">mean_sq</span> <span class="o">-</span> <span class="n">mean</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># optional iterative sigma clipping</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iters</span><span class="p">):</span>
+            <span class="n">resid</span> <span class="o">=</span> <span class="n">image</span> <span class="o">-</span> <span class="n">mean</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">resid</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">rms</span>
+            <span class="n">image_2</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">image_2</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>  <span class="c1"># replace outliers</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">uniform_filter</span><span class="p">(</span><span class="n">image_2</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span>
+            <span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">uniform_filter</span><span class="p">(</span><span class="n">image_2</span> <span class="o">*</span> <span class="n">image_2</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rms</span><span class="p">,</span> <span class="n">mean</span></div>
 
 
 <div class="viewcode-block" id="PostProcessor.estimate_noise_map">
@@ -369,7 +469,16 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CYAN</span><span class="si">}</span><span class="s2">Creating RMS map...</span><span class="si">{</span><span class="n">RESET</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rms_box</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
             <span class="n">rms_box</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_beam_fwhm</span><span class="p">())</span> <span class="o">*</span> <span class="mi">10</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise_map</span><span class="p">(</span><span class="n">raw_residuals</span><span class="p">,</span> <span class="n">box_size</span><span class="o">=</span><span class="n">rms_box</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise_map</span><span class="p">(</span><span class="n">raw_residuals</span><span class="p">,</span> <span class="n">box_size</span><span class="o">=</span><span class="n">rms_box</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">raw_model_map</span><span class="p">,</span> <span class="n">raw_residuals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise_map</span><span class="p">(</span>
+            <span class="n">raw_residuals</span><span class="p">,</span>
+            <span class="n">box_size</span><span class="o">=</span><span class="n">rms_box</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">rms_box</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">max_iters</span><span class="o">=</span><span class="n">rms_box</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="c1"># self.rms_map, _ = self.fast_noise_map(raw_residuals, box_size=rms_box)</span>
 
         <span class="k">return</span> <span class="n">raw_model_map</span><span class="p">,</span> <span class="n">raw_residuals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rms_map</span></div>
 
@@ -745,9 +854,10 @@
                 <span class="s2">&quot;centroid-1&quot;</span><span class="p">:</span> <span class="s2">&quot;x_location_cutout&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;max_intensity&quot;</span><span class="p">:</span> <span class="s2">&quot;peak_flux&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;sigma_peak&quot;</span><span class="p">:</span> <span class="s2">&quot;peak_flux_error&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="s2">&quot;segmentation_pixel_coords&quot;</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-        <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">,</span> <span class="s2">&quot;perimeter&quot;</span><span class="p">])</span>
+        <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;perimeter&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="n">catalogue</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span></div>
 
