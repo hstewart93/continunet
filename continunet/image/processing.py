@@ -185,7 +185,7 @@ class PostProcessor:
 
     def get_beam_fwhm(self):
         """Get FWHM of the beam in pixels from the fits header."""
-        pixel_angular_size = self.header["CDELT2"]
+        pixel_angular_size = abs(self.header["CDELT2"])
         beam_fwhm = self.header["BMAJ"]
         return beam_fwhm / pixel_angular_size
 
@@ -458,7 +458,7 @@ class PostProcessor:
     def calculate_area_correction_factor(self):
         """Function to calculate the area correction factor for a given image."""
         # in arcseconds
-        increment = self.header["CDELT2"] * 3600
+        increment = abs(self.header["CDELT2"]) * 3600
         beam_bmaj = self.header["BMAJ"] * 3600
         beam_bmin = self.header["BMIN"] * 3600
 
@@ -497,7 +497,7 @@ class PostProcessor:
 
     def get_beam_size(self):
         """Get sigma of the beam in pixels from the fits header."""
-        pixel_angular_size = self.header["CDELT2"]
+        pixel_angular_size = abs(self.header["CDELT2"])
         beam_fwhm = self.header["BMAJ"]
         fwhm_pixels = beam_fwhm / pixel_angular_size
 
@@ -506,11 +506,11 @@ class PostProcessor:
 
     def get_beam_area(self):
         """Returns the area of the Gaussian beam in pixels"""
-        pixel_angular_size = self.header["CDELT2"]
+        pixel_angular_size = abs(self.header["CDELT2"])
         beam_major_axis_pixels = self.header["BMAJ"] / pixel_angular_size
         beam_minor_axis_pixels = self.header["BMIN"] / pixel_angular_size
 
-        return 1.133097 * beam_major_axis_pixels * beam_minor_axis_pixels  # pi/(4 ln2)
+        return np.pi * beam_major_axis_pixels * beam_minor_axis_pixels / (4.0 * np.log(2.0))
 
     def get_source_mask(self, predicted_map, source, beam_shape):
         """Get the mask of the source in the cutout."""
@@ -541,28 +541,73 @@ class PostProcessor:
             padded_array = np.pad(padded_array, ((0, 0), (0, 1)), mode="constant")
         return padded_array
 
+    def generate_normalized_beam(self):
+        """"""
+        sigma = self.get_beam_size()
+        size = int(np.ceil(8 * sigma))  # wide enough for wings
+        y, x = np.indices((size, size))
+        cy = (size - 1) / 2
+        cx = (size - 1) / 2
+
+        beam = np.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (2 * sigma**2))
+        beam /= beam.sum()  # ← normalize so total = 1
+        return beam
+
     def correct_flux_densities(self, properties, predicted_map):
-        """Correct the flux densities of the sources in the cutout
-        for undersampling the synthesized beam."""
-        beam = self.generate_2d_gaussian_beam()
-        beam_five_sigma = 5 * self.get_beam_size()
-        beam_five_sigma_area = np.pi * beam_five_sigma**2
-        for source_index, source in properties.iterrows():
-            if source.ellipse_area > beam_five_sigma_area:
-                correction_factor = 1
-                properties.at[source_index, "correction_factor"] = correction_factor
+        """
+        Correct integrated fluxes for beam undersampling.
+        Works only for compact sources (<~ few beam areas).
+        """
+        beam = self.generate_normalized_beam()  # normalized, centered
+        beam_area_pixels = self.get_beam_area()  # for extended-source check
 
-            mask = self.get_source_mask(predicted_map, source, beam.shape)
+        for idx, src in properties.iterrows():
 
-            masked_beam = np.sum(beam * mask)
-            correction_factor = np.sum(beam) / masked_beam
-            properties.at[source_index, "correction_factor"] = correction_factor
-            properties.at[source_index, "intensity_sum_corrected"] = (
-                source.image_intensity * correction_factor
-            )
+            # ---------- 1) Extract source mask ----------
+            mask = self.get_source_mask(predicted_map, src, beam.shape)
+            mask = (mask > 0).astype(float)
+
+            # ---------- 2) Extended sources: no correction ----------
+            if src.source_area_pixels > 3 * beam_area_pixels:
+                properties.at[idx, "correction_factor"] = 1.0
+                properties.at[idx, "intensity_sum_corrected"] = src.image_intensity
+                continue
+
+            # ---------- 3) Fraction of beam captured ----------
+            captured_fraction = np.sum(beam * mask)
+
+            if captured_fraction <= 0 or not np.isfinite(captured_fraction):
+                correction_factor = 1.0
+            else:
+                correction_factor = 1.0 / captured_fraction
+
+            properties.at[idx, "correction_factor"] = correction_factor
+            properties.at[idx, "intensity_sum_corrected"] = src.image_intensity * correction_factor
+
         return properties
 
-    def calculate_flux_errors(self, properties, correction_factor):
+    # def correct_flux_densities(self, properties, predicted_map):
+    #     """Correct the flux densities of the sources in the cutout
+    #     for undersampling the synthesized beam."""
+    #     beam = self.generate_2d_gaussian_beam()
+    #     beam_five_sigma = 5 * self.get_beam_size()
+    #     beam_five_sigma_area = np.pi * beam_five_sigma**2
+    #     for source_index, source in properties.iterrows():
+    #         if source.ellipse_area > beam_five_sigma_area:
+    #             correction_factor = 1
+    #             properties.at[source_index, "correction_factor"] = correction_factor
+
+    #         mask = self.get_source_mask(predicted_map, source, beam.shape)
+
+    #         masked_beam = np.sum(beam * mask)
+    #         correction_factor = np.sum(beam) / masked_beam
+    #         properties.at[source_index, "correction_factor"] = correction_factor
+    #         properties.at[source_index, "intensity_sum_corrected"] = (
+    #             source.image_intensity * correction_factor
+    #         )
+    #     return properties
+
+    def calculate_flux_errors(self, properties):
         """
         Compute peak and integrated flux uncertainties and signal-to-noise ratios
         for a single radio source using the local RMS noise map.
@@ -639,7 +684,9 @@ class PostProcessor:
             properties.at[source_index, "sigma_peak"] = local_rms
 
         # number of beams covered by the source, beam_area is in pixels
-        n_beams = properties["source_area_pixels"] / self.get_beam_area()
+        n_beams = (
+            properties["source_area_pixels"] * properties["correction_factor"]
+        ) / self.get_beam_area()
         # computes the uncertainty on the integrated flux density of a source
         # computes in quadrature for extended sources
         sigma_integrated = properties["sigma_peak"] * np.sqrt(n_beams)  # Jy/beam
@@ -692,7 +739,7 @@ class PostProcessor:
             catalogue["flux_density_error"],
             catalogue["snr_peak"],
             catalogue["snr_integrated"],
-        ) = self.calculate_flux_errors(catalogue, area_correction_factor)
+        ) = self.calculate_flux_errors(catalogue)
 
         # rename and drop columns
         catalogue = catalogue.rename(
