@@ -1,5 +1,6 @@
 """Tests for the UNet model."""
 
+import numpy as np
 import pytest
 
 from continunet.constants import TRAINED_MODEL
@@ -67,7 +68,63 @@ class TestUnet:
     def test_decode_image_colour_image(self, colour_image, colour_image_input_shape):
         """Test the decode_image method with a colour image"""
         test_model = self.model(
-            colour_image_input_shape, image=colour_image, trained_model=TRAINED_MODEL,
+            colour_image_input_shape,
+            image=colour_image,
+            trained_model=TRAINED_MODEL,
         )
         with pytest.raises(ValueError):
             test_model.decode_image()
+
+    @pytest.mark.parametrize("size", [512, 1024])
+    def test_large_input_shapes(self, size):
+        """
+        Test the UNet build and forward pass on larger image sizes
+        to ensure shape concatenation works (no off-by-one mismatches).
+        """
+
+        input_shape = (size, size, 1)
+        input_image = np.random.rand(1, *input_shape).astype(np.float32)
+        print(f"\n[DEBUG] Testing UNet with input shape: {input_shape}")
+
+        # Build model
+        unet = self.model(input_shape)
+        assert unet.model.input_shape == (None, *input_shape)
+
+        # Forward pass: should run without shape mismatch
+        try:
+            output = unet.model.predict(input_image, verbose=0)
+        except ValueError as e:
+            pytest.fail(f"Shape mismatch error for input {input_shape}: {e}")
+
+        # Validate output shape
+        assert output.shape == (
+            1,
+            *input_shape,
+        ), f"Output shape {output.shape} != expected {(1, *input_shape)}"
+
+    def test_decode_image_shape_check(self):
+        """Asserts ValueError raised if invalid image shape parsed to network"""
+        unet = self.model((256, 256, 1))
+        bad_img = np.zeros((1, 257, 256, 1))
+        unet.image = bad_img
+        unet.trained_model = "dummy"
+        with pytest.raises(ValueError, match="must be divisible"):
+            unet.decode_image()
+
+    @pytest.mark.parametrize("shape", [(256, 512, 1), (512, 256, 1), (1024, 768, 1)])
+    def test_unet_accepts_non_square_images(self, shape):
+        """Ensure UNet can accept rectangular (non-square) grayscale inputs."""
+
+        image = np.random.rand(1, *shape).astype(np.float32)
+
+        test_model = self.model(shape, image=image, trained_model=TRAINED_MODEL)
+
+        decoded = test_model.decode_image()
+
+        assert decoded.shape == (
+            1,
+            *shape,
+        ), f"Expected output shape {shape}, got {decoded.shape[1:]}"
+
+        assert decoded.min() >= 0
+        assert decoded.max() <= 1

@@ -1,6 +1,6 @@
 """Compile ContinUNet modules into Finder class for source finding."""
 
-import importlib.resources
+from importlib.resources import files, as_file
 import time
 
 from astropy.table import Table
@@ -40,7 +40,14 @@ class Finder:
         self.residuals = None
         self.raw_sources = None
 
-    def find(self, generate_maps=False, threshold="default"):
+    def find(
+        self,
+        generate_maps=False,
+        threshold="default",
+        sigma_snr=5.0,
+        rms_box="default",
+        clean_maps=True,
+    ):
         """Find sources in a continuum image."""
         start_time = time.time()
         # Load image
@@ -51,12 +58,19 @@ class Finder:
         data = pre_processor.process()
 
         # Run U-Net
-        with importlib.resources.path("continunet.network", "trained_model.h5") as path:
+        with as_file(files("continunet.network") / "trained_model.h5") as path:
             unet = Unet(data.shape[1:4], trained_model=path, image=data, layers=self.layers)
         self.reconstructed_image = unet.decode_image()
 
         # Post-process reconstructed image
-        self.post_processor = PostProcessor(unet.reconstructed, pre_processor, threshold=threshold)
+        self.post_processor = PostProcessor(
+            unet.reconstructed,
+            pre_processor,
+            threshold=threshold,
+            sigma_snr=sigma_snr,
+            rms_box=rms_box,
+            clean_maps=clean_maps,
+        )
         self.sources = self.post_processor.get_sources()
         self.segmentation_map = self.post_processor.segmentation_map
         self.raw_sources = self.post_processor.raw_sources

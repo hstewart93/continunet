@@ -1,6 +1,5 @@
 """Constants for ContinuNet."""
 
-
 TRAINED_MODEL = "continunet/network/trained_model.h5"
 
 # ANSI escape sequences
