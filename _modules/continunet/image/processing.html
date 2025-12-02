@@ -277,7 +277,7 @@
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.get_beam_fwhm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_beam_fwhm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get FWHM of the beam in pixels from the fits header.&quot;&quot;&quot;</span>
-        <span class="n">pixel_angular_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">]</span>
+        <span class="n">pixel_angular_size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">])</span>
         <span class="n">beam_fwhm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMAJ&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">beam_fwhm</span> <span class="o">/</span> <span class="n">pixel_angular_size</span></div>
 
@@ -574,7 +574,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_area_correction_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to calculate the area correction factor for a given image.&quot;&quot;&quot;</span>
         <span class="c1"># in arcseconds</span>
-        <span class="n">increment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="n">increment</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mi">3600</span>
         <span class="n">beam_bmaj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMAJ&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3600</span>
         <span class="n">beam_bmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMIN&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3600</span>
 
@@ -628,7 +628,7 @@
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.get_beam_size">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_beam_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get sigma of the beam in pixels from the fits header.&quot;&quot;&quot;</span>
-        <span class="n">pixel_angular_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">]</span>
+        <span class="n">pixel_angular_size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">])</span>
         <span class="n">beam_fwhm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMAJ&quot;</span><span class="p">]</span>
         <span class="n">fwhm_pixels</span> <span class="o">=</span> <span class="n">beam_fwhm</span> <span class="o">/</span> <span class="n">pixel_angular_size</span>
 
@@ -640,11 +640,11 @@
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.get_beam_area">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_beam_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the area of the Gaussian beam in pixels&quot;&quot;&quot;</span>
-        <span class="n">pixel_angular_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">]</span>
+        <span class="n">pixel_angular_size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;CDELT2&quot;</span><span class="p">])</span>
         <span class="n">beam_major_axis_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMAJ&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">pixel_angular_size</span>
         <span class="n">beam_minor_axis_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;BMIN&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">pixel_angular_size</span>
 
-        <span class="k">return</span> <span class="mf">1.133097</span> <span class="o">*</span> <span class="n">beam_major_axis_pixels</span> <span class="o">*</span> <span class="n">beam_minor_axis_pixels</span>  <span class="c1"># pi/(4 ln2)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">beam_major_axis_pixels</span> <span class="o">*</span> <span class="n">beam_minor_axis_pixels</span> <span class="o">/</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="PostProcessor.get_source_mask">
@@ -682,33 +682,81 @@
         <span class="k">return</span> <span class="n">padded_array</span></div>
 
 
+<div class="viewcode-block" id="PostProcessor.generate_normalized_beam">
+<a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.generate_normalized_beam">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_normalized_beam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_size</span><span class="p">()</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">))</span>  <span class="c1"># wide enough for wings</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
+        <span class="n">cy</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">beam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">cx</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">cy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">beam</span> <span class="o">/=</span> <span class="n">beam</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># ← normalize so total = 1</span>
+        <span class="k">return</span> <span class="n">beam</span></div>
+
+
 <div class="viewcode-block" id="PostProcessor.correct_flux_densities">
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.correct_flux_densities">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">correct_flux_densities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">predicted_map</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Correct the flux densities of the sources in the cutout</span>
-<span class="sd">        for undersampling the synthesized beam.&quot;&quot;&quot;</span>
-        <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_2d_gaussian_beam</span><span class="p">()</span>
-        <span class="n">beam_five_sigma</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_size</span><span class="p">()</span>
-        <span class="n">beam_five_sigma_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">beam_five_sigma</span><span class="o">**</span><span class="mi">2</span>
-        <span class="k">for</span> <span class="n">source_index</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">ellipse_area</span> <span class="o">&gt;</span> <span class="n">beam_five_sigma_area</span><span class="p">:</span>
-                <span class="n">correction_factor</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">source_index</span><span class="p">,</span> <span class="s2">&quot;correction_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correction_factor</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Correct integrated fluxes for beam undersampling.</span>
+<span class="sd">        Works only for compact sources (&lt;~ few beam areas).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_normalized_beam</span><span class="p">()</span>  <span class="c1"># normalized, centered</span>
+        <span class="n">beam_area_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_area</span><span class="p">()</span>  <span class="c1"># for extended-source check</span>
 
-            <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_source_mask</span><span class="p">(</span><span class="n">predicted_map</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">beam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
 
-            <span class="n">masked_beam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">beam</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span>
-            <span class="n">correction_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">beam</span><span class="p">)</span> <span class="o">/</span> <span class="n">masked_beam</span>
-            <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">source_index</span><span class="p">,</span> <span class="s2">&quot;correction_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correction_factor</span>
-            <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">source_index</span><span class="p">,</span> <span class="s2">&quot;intensity_sum_corrected&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">source</span><span class="o">.</span><span class="n">image_intensity</span> <span class="o">*</span> <span class="n">correction_factor</span>
-            <span class="p">)</span>
+            <span class="c1"># ---------- 1) Extract source mask ----------</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_source_mask</span><span class="p">(</span><span class="n">predicted_map</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">beam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">mask</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+            <span class="c1"># ---------- 2) Extended sources: no correction ----------</span>
+            <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">source_area_pixels</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">beam_area_pixels</span><span class="p">:</span>
+                <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;correction_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;intensity_sum_corrected&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">image_intensity</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># ---------- 3) Fraction of beam captured ----------</span>
+            <span class="n">captured_fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">beam</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">captured_fraction</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">captured_fraction</span><span class="p">):</span>
+                <span class="n">correction_factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">correction_factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">captured_fraction</span>
+
+            <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;correction_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correction_factor</span>
+            <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;intensity_sum_corrected&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">image_intensity</span> <span class="o">*</span> <span class="n">correction_factor</span>
+
         <span class="k">return</span> <span class="n">properties</span></div>
 
 
+    <span class="c1"># def correct_flux_densities(self, properties, predicted_map):</span>
+    <span class="c1">#     &quot;&quot;&quot;Correct the flux densities of the sources in the cutout</span>
+    <span class="c1">#     for undersampling the synthesized beam.&quot;&quot;&quot;</span>
+    <span class="c1">#     beam = self.generate_2d_gaussian_beam()</span>
+    <span class="c1">#     beam_five_sigma = 5 * self.get_beam_size()</span>
+    <span class="c1">#     beam_five_sigma_area = np.pi * beam_five_sigma**2</span>
+    <span class="c1">#     for source_index, source in properties.iterrows():</span>
+    <span class="c1">#         if source.ellipse_area &gt; beam_five_sigma_area:</span>
+    <span class="c1">#             correction_factor = 1</span>
+    <span class="c1">#             properties.at[source_index, &quot;correction_factor&quot;] = correction_factor</span>
+
+    <span class="c1">#         mask = self.get_source_mask(predicted_map, source, beam.shape)</span>
+
+    <span class="c1">#         masked_beam = np.sum(beam * mask)</span>
+    <span class="c1">#         correction_factor = np.sum(beam) / masked_beam</span>
+    <span class="c1">#         properties.at[source_index, &quot;correction_factor&quot;] = correction_factor</span>
+    <span class="c1">#         properties.at[source_index, &quot;intensity_sum_corrected&quot;] = (</span>
+    <span class="c1">#             source.image_intensity * correction_factor</span>
+    <span class="c1">#         )</span>
+    <span class="c1">#     return properties</span>
+
 <div class="viewcode-block" id="PostProcessor.calculate_flux_errors">
 <a class="viewcode-back" href="../../../continunet.image.html#continunet.image.processing.PostProcessor.calculate_flux_errors">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_flux_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">correction_factor</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_flux_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute peak and integrated flux uncertainties and signal-to-noise ratios</span>
 <span class="sd">        for a single radio source using the local RMS noise map.</span>
@@ -785,7 +833,9 @@
             <span class="n">properties</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">source_index</span><span class="p">,</span> <span class="s2">&quot;sigma_peak&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_rms</span>
 
         <span class="c1"># number of beams covered by the source, beam_area is in pixels</span>
-        <span class="n">n_beams</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;source_area_pixels&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_area</span><span class="p">()</span>
+        <span class="n">n_beams</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;source_area_pixels&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;correction_factor&quot;</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_beam_area</span><span class="p">()</span>
         <span class="c1"># computes the uncertainty on the integrated flux density of a source</span>
         <span class="c1"># computes in quadrature for extended sources</span>
         <span class="n">sigma_integrated</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;sigma_peak&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_beams</span><span class="p">)</span>  <span class="c1"># Jy/beam</span>
@@ -841,7 +891,7 @@
             <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;flux_density_error&quot;</span><span class="p">],</span>
             <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;snr_peak&quot;</span><span class="p">],</span>
             <span class="n">catalogue</span><span class="p">[</span><span class="s2">&quot;snr_integrated&quot;</span><span class="p">],</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_flux_errors</span><span class="p">(</span><span class="n">catalogue</span><span class="p">,</span> <span class="n">area_correction_factor</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_flux_errors</span><span class="p">(</span><span class="n">catalogue</span><span class="p">)</span>
 
         <span class="c1"># rename and drop columns</span>
         <span class="n">catalogue</span> <span class="o">=</span> <span class="n">catalogue</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
